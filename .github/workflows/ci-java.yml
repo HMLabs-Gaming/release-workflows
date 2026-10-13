@@ -35,7 +35,6 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ inputs.java-version }}
-          cache: maven
       - name: Run configured build
         shell: bash
         env:
