@@ -15,7 +15,7 @@ on:
         type: string
         required: false
         default: resourcepack-build-output
-jobs:
+
 permissions:
   contents: read
 
