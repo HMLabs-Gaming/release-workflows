@@ -29,7 +29,7 @@ seen = set()
 for item in artifacts:
     if not isinstance(item, dict) or not item.get("path"):
         raise SystemExit("Each artifact must have a path")
-    src = pathlib.Path(item["path"])
+    src = pathlib.Path(item["path"].replace("{version}", version))
     if not src.is_file():
         raise SystemExit(f"Artifact does not exist: {src}")
     loader = item.get("loader")
