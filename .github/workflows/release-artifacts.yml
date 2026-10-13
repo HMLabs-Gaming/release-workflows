@@ -61,10 +61,32 @@ on:
         type: string
         required: false
         default: ""
+      hangar-project-slug:
+        description: Optional Hangar project slug; intended for plugin projects only
+        type: string
+        required: false
+        default: ""
+      hangar-channel:
+        description: Hangar channel, e.g. Release, Beta, or Alpha
+        type: string
+        required: false
+        default: Release
+      hangar-files:
+        description: Hangar action files JSON, with paths relative to the downloaded platform-assets directory
+        type: string
+        required: false
+        default: ""
+      hangar-platform-dependencies:
+        description: JSON object of Hangar platform dependency versions
+        type: string
+        required: false
+        default: "{}"
     secrets:
       MODRINTH_TOKEN:
         required: false
       CURSEFORGE_TOKEN:
+        required: false
+      HANGAR_API_TOKEN:
         required: false
 
 permissions:
@@ -174,3 +196,26 @@ jobs:
           version-type: ${{ inputs.version-type }}
           loaders: ${{ inputs.loaders }}
           game-versions: ${{ inputs.game-versions }}
+
+  publish-hangar:
+    needs: build-and-release
+    if: inputs.hangar-project-slug != '' && inputs.hangar-files != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download versioned release files
+        uses: actions/download-artifact@v4
+        with:
+          name: platform-publish-assets
+          path: platform-assets
+      - name: Publish plugin to Hangar
+        uses: milkdrinkers/Hangar-Publish@v2
+        with:
+          api_token: ${{ secrets.HANGAR_API_TOKEN }}
+          slug: ${{ inputs.hangar-project-slug }}
+          version: ${{ github.event.release.tag_name }}
+          channel: ${{ inputs.hangar-channel }}
+          description: ${{ github.event.release.body }}
+          files: ${{ inputs.hangar-files }}
+          platform_dependencies: ${{ inputs.hangar-platform-dependencies }}
