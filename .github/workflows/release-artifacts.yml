@@ -36,7 +36,7 @@ on:
         type: boolean
         required: false
         default: false
-jobs:
+
 permissions:
   contents: write
 
