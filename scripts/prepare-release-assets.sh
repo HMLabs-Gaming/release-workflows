@@ -13,6 +13,8 @@ version = os.environ["RELEASE_VERSION"].strip().removeprefix("v")
 artifacts = json.loads(os.environ["ARTIFACTS_JSON"])
 out = pathlib.Path("release-assets")
 out.mkdir(parents=True, exist_ok=True)
+platform_out = pathlib.Path("platform-assets")
+platform_out.mkdir(parents=True, exist_ok=True)
 
 def safe(value, label):
     if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", value):
@@ -42,10 +44,12 @@ for item in artifacts:
         names = [f"{slug}-{version}-{loader.lower()}{ext}", f"{slug}-{loader.lower()}{ext}"]
     else:
         names = [f"{slug}-{version}{ext}", f"{slug}{ext}"]
-    for name in names:
+    for index, name in enumerate(names):
         if name in seen:
             raise SystemExit(f"Duplicate output filename: {name}")
         seen.add(name)
         shutil.copy2(src, out / name)
+        if index == 0:
+            shutil.copy2(src, platform_out / name)
         print(f"Prepared {out / name}")
 PY
