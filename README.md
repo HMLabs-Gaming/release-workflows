@@ -44,4 +44,10 @@ Use `universal` only when the same binary supports all configured targets. Modpa
 
 ## Documentation
 
-See [setup](docs/setup.md), [naming](docs/naming.md), [secrets](docs/secrets.md), [platform publishing](docs/platform-publishing.md), [migration](docs/migration.md), and [troubleshooting](docs/troubleshooting.md).
+- [Overview](https://release-workflows.gaming.hmlabs.eu)
+- [Setup](https://release-workflows.gaming.hmlabs.eu/setup.html)
+- [Naming](https://release-workflows.gaming.hmlabs.eu/naming.html)
+- [Secrets](https://release-workflows.gaming.hmlabs.eu/secrets.html)
+- [Platform Publishing](https://release-workflows.gaming.hmlabs.eu/platform-publishing.html)
+- [Migration](https://release-workflows.gaming.hmlabs.eu/migration.html)
+- [Troubleshooting](https://release-workflows.gaming.hmlabs.eu/troubleshooting.html)
