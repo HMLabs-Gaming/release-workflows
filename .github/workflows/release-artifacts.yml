@@ -169,6 +169,18 @@ jobs:
                   game_versions = [str(versions["minecraft"])] if versions.get("minecraft") else []
                   print(f"Detected Packwiz metadata from {pack}")
 
+          # Bukkit/Paper plugin compatibility is declared by api-version in plugin.yml.
+          # Use it as the game-version fallback; callers can still override loaders.
+          if not game_versions:
+              plugin_metadata = Path("src/main/resources/plugin.yml")
+              if plugin_metadata.is_file():
+                  text = plugin_metadata.read_text(encoding="utf-8")
+                  match = re.search(r"^\\s*api-version\\s*:\\s*[\"']?([^\"'\\s#]+)", text, re.MULTILINE)
+                  if match:
+                      game_versions = [match.group(1)]
+                      loaders = ["paper"]
+                      print(f"Detected Paper plugin metadata from {plugin_metadata}")
+
           print(f"Detected loaders={loaders}, game_versions={game_versions}")
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
               output.write("loaders<<DETECTED_LOADERS\n")
