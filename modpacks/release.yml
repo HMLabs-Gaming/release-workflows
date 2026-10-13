@@ -1,0 +1,21 @@
+# Caller example: copy to the consuming modpack repository at .github/workflows/release.yml.
+name: Modpack Release
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/release-artifacts.yml@main
+    with:
+      project-slug: example-modpack
+      use-java: false
+      use-go: true
+      build-command: |
+        go install github.com/packwiz/packwiz@latest
+        (cd platforms/modrinth && packwiz modrinth export)
+        (cd platforms/curseforge && packwiz curseforge export)
+      artifacts-json: '[{"path":"platforms/modrinth/example-modpack.mrpack"},{"path":"platforms/curseforge/example-modpack.zip"}]'
