@@ -37,7 +37,7 @@ Use `universal` only when the same binary supports all configured targets. Modpa
 - CI builds/tests and uploads downloadable GitHub Actions artifacts; it does not publish externally.
 - Release workflows build from the published tag, generate both filename variants, and attach every variant to that GitHub Release.
 - Optional independent Modrinth and CurseForge jobs publish versioned assets when project IDs and tokens are configured.
-- Hangar needs a separately verified adapter; SpigotMC remains manual.
+- Hangar publishing is available only for plugins; SpigotMC remains manual.
 - Fork pull requests must never receive publishing tokens.
 - Pin reusable workflow references to a tested release tag (for example `@v1`) once a tag is published, and set `workflow-ref` to the same tag.
 - Migrate projects incrementally and retain old workflows until each migration is verified.
