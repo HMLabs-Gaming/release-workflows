@@ -65,7 +65,6 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ inputs.java-version }}
-          cache: maven
       - name: Set up Go
         if: inputs.use-go
         uses: actions/setup-go@v5
