@@ -15,6 +15,16 @@ Examples:
 - `hm-basic-play-3.2.0.zip` and `hm-basic-play.zip`
 - `js-green-ores-1.5.0.zip` and `js-green-ores.zip`
 
+## Source artifact paths
+
+In `artifacts-json`, use the `{version}` placeholder whenever the built file itself contains the release version, for example:
+
+```yaml
+artifacts-json: '[{"path":"platforms/modrinth/example-modpack-{version}.mrpack"},{"path":"platforms/curseforge/example-modpack-{version}.zip"}]'
+```
+
+The workflow replaces `{version}` with the release tag without a leading `v` before checking the source path. The source path must match the actual filename produced by the build/export command. For outputs that do not include a version in their source filename, use the literal path and let the workflow generate versioned release asset names.
+
 Rules:
 - Use lowercase kebab-case for slugs and loader names.
 - Remove a leading `v` from a release tag when constructing filenames.
