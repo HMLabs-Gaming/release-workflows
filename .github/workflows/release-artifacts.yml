@@ -114,40 +114,68 @@ jobs:
           ref: ${{ inputs.workflow-ref }}
           path: .release-workflows
           persist-credentials: false
-      - name: Detect Minecraft loaders and game versions from Packwiz metadata
+      - name: Detect Minecraft loader and game versions
         id: pack-metadata
         shell: bash
         run: |
           python3 - <<'PY'
+          import json
           import os
+          import re
           import tomllib
           from pathlib import Path
 
-          candidates = [
-              Path("platforms/modrinth/pack.toml"),
-              Path("platforms/curseforge/pack.toml"),
-              Path("pack.toml"),
-          ]
-          pack = next((p for p in candidates if p.is_file()), None)
-          if pack is None:
-              print("No Packwiz pack.toml found; platform inputs can still be supplied explicitly.")
-              loaders = []
-              game_versions = []
-          else:
-              with pack.open("rb") as f:
-                  data = tomllib.load(f)
-              versions = data.get("versions", {})
-              known_loaders = ("fabric", "forge", "neoforge", "quilt", "liteloader", "modloader")
-              loaders = [name for name in known_loaders if versions.get(name)]
-              game_versions = [str(versions["minecraft"])] if versions.get("minecraft") else []
-              print(f"Detected metadata from {pack}: loaders={loaders}, game_versions={game_versions}")
+          loaders = []
+          game_versions = []
+
+          # For Fabric/Gradle mods, gradle.properties is the most direct source.
+          properties = Path("gradle.properties")
+          if properties.is_file():
+              text = properties.read_text(encoding="utf-8")
+              match = re.search(r"^\\s*minecraft_version\\s*=\\s*([^\\s#]+)", text, re.MULTILINE)
+              if match:
+                  game_versions = [match.group(1)]
+                  loaders = ["fabric"]
+
+          # Fall back to fabric.mod.json if the Gradle property is unavailable.
+          if not game_versions:
+              fabric_metadata = Path("src/main/resources/fabric.mod.json")
+              if fabric_metadata.is_file():
+                  data = json.loads(fabric_metadata.read_text(encoding="utf-8"))
+                  dependency = data.get("depends", {}).get("minecraft")
+                  if isinstance(dependency, str):
+                      # Platform metadata needs concrete version labels. Extract the
+                      # version token from common Fabric constraints such as "~1.21.4".
+                      match = re.search(r"\\d+(?:\\.\\d+){1,3}", dependency)
+                      if match:
+                          game_versions = [match.group(0)]
+                          loaders = ["fabric"]
+
+          # Packwiz metadata remains supported for modpacks.
+          if not game_versions:
+              candidates = [
+                  Path("platforms/modrinth/pack.toml"),
+                  Path("platforms/curseforge/pack.toml"),
+                  Path("pack.toml"),
+              ]
+              pack = next((p for p in candidates if p.is_file()), None)
+              if pack is not None:
+                  with pack.open("rb") as f:
+                      data = tomllib.load(f)
+                  versions = data.get("versions", {})
+                  known_loaders = ("fabric", "forge", "neoforge", "quilt", "liteloader", "modloader")
+                  loaders = [name for name in known_loaders if versions.get(name)]
+                  game_versions = [str(versions["minecraft"])] if versions.get("minecraft") else []
+                  print(f"Detected Packwiz metadata from {pack}")
+
+          print(f"Detected loaders={loaders}, game_versions={game_versions}")
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write("loaders<<PACK_METADATA\n")
-              output.write("\n".join(loaders) + "\n")
-              output.write("PACK_METADATA\n")
-              output.write("game-versions<<PACK_METADATA_VERSIONS\n")
-              output.write("\n".join(game_versions) + "\n")
-              output.write("PACK_METADATA_VERSIONS\n")
+              output.write("loaders<<DETECTED_LOADERS\\n")
+              output.write("\\n".join(loaders) + "\\n")
+              output.write("DETECTED_LOADERS\\n")
+              output.write("game-versions<<DETECTED_GAME_VERSIONS\\n")
+              output.write("\\n".join(game_versions) + "\\n")
+              output.write("DETECTED_GAME_VERSIONS\\n")
           PY
       - name: Set up Java
         if: inputs.use-java
