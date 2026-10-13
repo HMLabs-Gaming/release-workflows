@@ -1,11 +1,22 @@
 name: Validate workflow library
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+    paths:
+      - ".github/workflows/**"
+      - "scripts/**"
+      - "docs/**"
+      - "README.md"
+      - "plugins/**"
+      - "mods/**"
+      - "modpacks/**"
+      - "resourcepacks/**"
   workflow_dispatch:
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
