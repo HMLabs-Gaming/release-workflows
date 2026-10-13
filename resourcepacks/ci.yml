@@ -1,0 +1,18 @@
+# Caller example: copy to the consuming resource-pack repository at .github/workflows/ci.yml.
+name: Resource Pack CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-resourcepack.yml@main
+    with:
+      validate-command: "test -f pack.mcmeta && zip -qr resourcepack.zip pack.mcmeta assets"
+      artifact-paths: |
+        resourcepack.zip
+      artifact-name: resourcepack-build
