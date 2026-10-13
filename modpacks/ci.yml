@@ -1,0 +1,21 @@
+# Caller example: copy to the consuming modpack repository at .github/workflows/ci.yml.
+name: Modpack CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-packwiz.yml@main
+    with:
+      go-version: "1.22"
+      packwiz-install-command: "go install github.com/packwiz/packwiz@latest"
+      validate-command: "packwiz --help"
+      artifact-paths: |
+        platforms/modrinth/*.mrpack
+        platforms/curseforge/*.zip
+      artifact-name: modpack-exports
