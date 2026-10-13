@@ -31,5 +31,5 @@ jobs:
       hangar-project-slug: ExamplePlugin
       hangar-channel: Release
       # Neither JAR is uploaded to Hangar; each platform points to a GitHub Release asset.
-      hangar-files: '[{"platforms":["PAPER"],"url":true,"externalUrl":"https://github.com/OWNER/REPOSITORY/releases/download/{tag}/example-plugin-{version}-paper.jar"},{"platforms":["VELOCITY"],"url":true,"externalUrl":"https://github.com/OWNER/REPOSITORY/releases/download/{tag}/example-plugin-{version}-velocity.jar"}]'
+      hangar-files: '[{"platforms":["PAPER"],"url":true,"externalURL":"https://github.com/OWNER/REPOSITORY/releases/download/{tag}/example-plugin-{version}-paper.jar"},{"platforms":["VELOCITY"],"url":true,"externalURL":"https://github.com/OWNER/REPOSITORY/releases/download/{tag}/example-plugin-{version}-velocity.jar"}]'
     secrets: inherit
