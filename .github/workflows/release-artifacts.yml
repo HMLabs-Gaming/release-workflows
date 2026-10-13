@@ -15,6 +15,11 @@ on:
         description: JSON array such as [{"path":"target/plugin.jar","loader":"universal"}]
         type: string
         required: true
+      workflow-ref:
+        description: Ref of this repository containing the naming script; keep aligned with the reusable workflow ref
+        type: string
+        required: false
+        default: main
       java-version:
         type: string
         required: false
@@ -46,6 +51,13 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
           fetch-depth: 0
+      - name: Checkout reusable workflow scripts
+        uses: actions/checkout@v4
+        with:
+          repository: HMLabs-Gaming/release-workflows
+          ref: ${{ inputs.workflow-ref }}
+          path: .release-workflows
+          persist-credentials: false
       - name: Set up Java
         if: inputs.use-java
         uses: actions/setup-java@v4
@@ -69,7 +81,7 @@ jobs:
           PROJECT_SLUG: ${{ inputs.project-slug }}
           RELEASE_VERSION: ${{ github.event.release.tag_name }}
           ARTIFACTS_JSON: ${{ inputs.artifacts-json }}
-        run: bash "${{ github.action_path }}/scripts/prepare-release-assets.sh"
+        run: bash .release-workflows/scripts/prepare-release-assets.sh
       - name: Attach every asset to this GitHub Release
         uses: softprops/action-gh-release@v2
         with:
