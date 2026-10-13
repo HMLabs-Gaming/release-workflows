@@ -13,7 +13,15 @@ jobs:
     uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-java.yml@main
     with:
       java-version: "25"
-      build-command: "mvn -B verify -Pspigot"
+      build-command: |
+        set -Eeuo pipefail
+        mkdir -p build-artifacts
+        mvn -B clean package -DskipTests -Pspigot
+        cp target/hmt-sync-*-spigot.jar build-artifacts/
+        mvn -B clean package -DskipTests -Pvelocity
+        cp target/hmt-sync-*-velocity.jar build-artifacts/
+        mvn -B clean package -DskipTests -Puniversal
+        cp target/hmt-sync-*-universal.jar build-artifacts/
       artifact-paths: |
-        target/*.jar
-      artifact-name: plugin-build
+        build-artifacts/*.jar
+      artifact-name: hmt-sync-builds
