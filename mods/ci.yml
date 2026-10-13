@@ -12,8 +12,8 @@ jobs:
   ci:
     uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-java.yml@main
     with:
-      java-version: "21"
-      build-command: "./gradlew --no-daemon build"
+      java-version: "25"
+      build-command: "bash ./gradlew --no-daemon build"
       artifact-paths: |
         build/libs/*.jar
       artifact-name: mod-build
