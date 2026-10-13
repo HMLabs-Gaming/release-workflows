@@ -292,7 +292,7 @@ jobs:
           version = re.sub(r"^v", "", tag)
           files = json.loads(os.environ["HANGAR_FILES_JSON"])
           for item in files:
-              for key in ("path", "externalURL"):
+              for key in ("path", "externalUrl"):
                   if key in item:
                       item[key] = item[key].replace("{tag}", tag).replace("{version}", version)
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
