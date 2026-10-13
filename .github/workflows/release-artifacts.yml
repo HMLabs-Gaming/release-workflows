@@ -276,7 +276,7 @@ jobs:
           name: platform-publish-assets
           path: platform-assets
       - name: Publish plugin to Hangar
-        uses: milkdrinkers/Hangar-Publish@v2
+        uses: HMLabs-Gaming/Hangar-Publish@v2.3.0
         with:
           api_token: ${{ secrets.HANGAR_API_TOKEN }}
           slug: ${{ inputs.hangar-project-slug }}
