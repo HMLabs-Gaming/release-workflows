@@ -142,8 +142,12 @@ jobs:
               game_versions = [str(versions["minecraft"])] if versions.get("minecraft") else []
               print(f"Detected metadata from {pack}: loaders={loaders}, game_versions={game_versions}")
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"loaders={chr(10).join(loaders)}\n")
-              output.write(f"game-versions={chr(10).join(game_versions)}\n")
+              output.write("loaders<<PACK_METADATA\n")
+              output.write("\\n".join(loaders) + "\\n")
+              output.write("PACK_METADATA\\n")
+              output.write("game-versions<<PACK_METADATA_VERSIONS\\n")
+              output.write("\\n".join(game_versions) + "\\n")
+              output.write("PACK_METADATA_VERSIONS\\n")
           PY
       - name: Set up Java
         if: inputs.use-java
