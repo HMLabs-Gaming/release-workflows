@@ -146,7 +146,7 @@ jobs:
               output.write("\n".join(loaders) + "\n")
               output.write("PACK_METADATA\n")
               output.write("game-versions<<PACK_METADATA_VERSIONS\n")
-              output.write("\\n".join(game_versions) + "\\n")
+              output.write("\n".join(game_versions) + "\n")
               output.write("PACK_METADATA_VERSIONS\n")
           PY
       - name: Set up Java
@@ -232,8 +232,8 @@ jobs:
           name: ${{ github.event.release.name || github.event.release.tag_name }}
           version: ${{ github.event.release.tag_name }}
           version-type: ${{ inputs.version-type }}
-          loaders: ${{ inputs.loaders }}
-          game-versions: ${{ inputs.game-versions }}
+          loaders: ${{ inputs.loaders != '' && inputs.loaders || needs.build-and-release.outputs.detected-loaders }}
+          game-versions: ${{ inputs.game-versions != '' && inputs.game-versions || needs.build-and-release.outputs.detected-game-versions }}
 
   publish-hangar:
     needs: build-and-release
