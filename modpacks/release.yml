@@ -18,5 +18,5 @@ jobs:
         go install github.com/packwiz/packwiz@latest
         (cd platforms/modrinth && packwiz modrinth export)
         (cd platforms/curseforge && packwiz curseforge export)
-      artifacts-json: '[{"path":"platforms/modrinth/example-modpack.mrpack"},{"path":"platforms/curseforge/example-modpack.zip"}]'
+      artifacts-json: '[{"path":"platforms/modrinth/example-modpack-{version}.mrpack"},{"path":"platforms/curseforge/example-modpack-{version}.zip"}]'
     secrets: inherit
