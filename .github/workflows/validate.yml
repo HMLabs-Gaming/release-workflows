@@ -1,0 +1,29 @@
+name: Validate workflow library
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: |
+          bash -n scripts/prepare-release-assets.sh
+      - name: Check release workflow paths and naming docs
+        run: |
+          test -f .github/workflows/ci-java.yml
+          test -f .github/workflows/ci-packwiz.yml
+          test -f .github/workflows/ci-resourcepack.yml
+          test -f .github/workflows/release-artifacts.yml
+          test -f docs/naming.md
+          grep -q 'versionless' README.md
+          grep -q 'release-assets' .github/workflows/release-artifacts.yml
