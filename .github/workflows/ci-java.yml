@@ -18,8 +18,9 @@ on:
         type: string
         required: false
         default: build-output
-    permissions:
-      contents: read
+jobs:
+permissions:
+  contents: read
 
 jobs:
   build:
