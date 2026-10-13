@@ -1,4 +1,6 @@
 # Caller example: copy to the consuming plugin repository at .github/workflows/release.yml.
+# This default example is for a single Paper plugin. Only add more artifacts/builds
+# when the plugin actually supports separate platforms or produces separate JARs.
 name: Plugin Release
 on:
   release:
@@ -11,25 +13,18 @@ jobs:
   release:
     uses: HMLabs-Gaming/release-workflows/.github/workflows/release-artifacts.yml@main
     with:
-      project-slug: hmt-sync
+      project-slug: example-plugin
       java-version: "25"
       build-command: |
         set -Eeuo pipefail
         version="${GITHUB_REF_NAME#v}"
         mkdir -p release-build
-        mvn -B clean package -DskipTests -Pspigot
-        cp target/hmt-sync-*-spigot.jar "release-build/hmt-sync-${version}-spigot.jar"
-        mvn -B clean package -DskipTests -Pvelocity
-        cp target/hmt-sync-*-velocity.jar "release-build/hmt-sync-${version}-velocity.jar"
-        mvn -B clean package -DskipTests -Puniversal
-        cp target/hmt-sync-*-universal.jar "release-build/hmt-sync-${version}-universal.jar"
-      artifacts-json: '[{"path":"release-build/hmt-sync-{version}-spigot.jar","loader":"spigot"},{"path":"release-build/hmt-sync-{version}-velocity.jar","loader":"velocity"},{"path":"release-build/hmt-sync-{version}-universal.jar","loader":"universal"}]'
-      # Hangar publishing is plugin-only. Fill in the real Hangar project slug
-      # and supported platform versions to enable it; empty values skip the job.
-      hangar-project-slug: ""
-      hangar-channel: Release
-      hangar-files: ""
-      hangar-platform-dependencies: '{}'
-      # Example hangar-files for separate Paper and Velocity JARs:
-      # '[{"path":"platform-assets/hmt-sync-*-spigot.jar","platforms":["PAPER"]},{"path":"platform-assets/hmt-sync-*-velocity.jar","platforms":["VELOCITY"]}]'
+        mvn -B clean package -DskipTests
+        cp target/example-plugin-*.jar "release-build/example-plugin-${version}-paper.jar"
+      artifacts-json: '[{"path":"release-build/example-plugin-{version}-paper.jar","loader":"paper"}]'
+      # Optional: enable Hangar only if this plugin is published there.
+      # hangar-project-slug: example-plugin
+      # hangar-channel: Release
+      # hangar-files: '[{"path":"platform-assets/example-plugin-*-paper.jar","platforms":["PAPER"]}]'
+      # hangar-platform-dependencies: '{"PAPER":[">=1.21"]}'
     secrets: inherit
