@@ -24,3 +24,4 @@ jobs:
         mvn -B clean package -DskipTests -Puniversal
         cp target/hmt-sync-*-universal.jar "release-build/hmt-sync-${version}-universal.jar"
       artifacts-json: '[{"path":"release-build/hmt-sync-{version}-spigot.jar","loader":"spigot"},{"path":"release-build/hmt-sync-{version}-velocity.jar","loader":"velocity"},{"path":"release-build/hmt-sync-{version}-universal.jar","loader":"universal"}]'
+    secrets: inherit
