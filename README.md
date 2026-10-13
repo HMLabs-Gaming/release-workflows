@@ -39,11 +39,11 @@ The versionless assets are attached to each release too. For a stable latest-rel
 
 - CI runs builds/tests and uploads downloadable GitHub Actions artifacts; it does not publish to external platforms.
 - Release workflows build from the published release tag and attach all versioned and versionless assets to that GitHub Release.
-- External publishing is opt-in and requires project IDs and secrets to be configured.
+- This initial implementation handles CI artifacts and GitHub Release assets. Platform-specific Modrinth, CurseForge, and Hangar publishing adapters are not yet wired into the reusable release workflow; see [platform publishing status](docs/platform-publishing.md).
 - Fork pull requests must never receive publishing tokens.
 - Keep permissions minimal and pin reusable workflow references to a released tag such as `@v1` once this repository has a tested release.
 - Migrate project repositories incrementally. Keep existing workflows until the central version is verified for that project.
 
 ## Getting started
 
-See [setup guide](docs/setup.md), [naming rules](docs/naming.md), [secrets](docs/secrets.md), [migration plan](docs/migration.md), and [troubleshooting](docs/troubleshooting.md).
+See [setup guide](docs/setup.md), [naming rules](docs/naming.md), [secrets](docs/secrets.md), [platform publishing status](docs/platform-publishing.md), [migration plan](docs/migration.md), and [troubleshooting](docs/troubleshooting.md).
