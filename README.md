@@ -1,21 +1,20 @@
 # HMLabs Gaming Release Workflows
 
-Central templates for CI and release automation for Minecraft mods, plugins, modpacks, and resource packs.
+Central reusable GitHub Actions workflows and caller examples for Minecraft mods, plugins, modpacks, and resource packs.
 
-## Important GitHub Actions constraint
+## Repository layout and GitHub Actions constraint
 
-GitHub only loads reusable workflow files from `.github/workflows/`. The `mods/`, `plugins/`, `modpacks/`, and `resourcepacks/` folders in this repository therefore contain **project-side caller examples and documentation**, not directly callable reusable workflows. The actual reusable workflows live under `.github/workflows/`. Project repositories use small caller files under their own `.github/workflows/` directory.
+GitHub only loads reusable workflow files from `.github/workflows/`. The `mods/`, `plugins/`, `modpacks/`, and `resourcepacks/` folders therefore contain organized caller examples and documentation, not directly callable reusable workflows. Consuming projects copy these examples into their own `.github/workflows/` directory and call the central workflows.
 
-## Project types
-
-- `mods/`: mod CI and release caller examples
-- `plugins/`: plugin CI and release caller examples
-- `modpacks/`: Packwiz CI and release caller examples
-- `resourcepacks/`: ZIP resource-pack CI and release caller examples
+- `.github/workflows/ci-java.yml`: Java/Maven or Gradle CI
+- `.github/workflows/ci-packwiz.yml`: Packwiz modpack CI
+- `.github/workflows/ci-resourcepack.yml`: resource-pack CI
+- `.github/workflows/release-artifacts.yml`: release assets and optional platform publishing
+- `.github/workflows/validate.yml`: repository smoke tests
 
 ## Artifact naming
 
-Every release artifact is attached to the GitHub Release in both versioned and unversioned form.
+Every release output is attached to the same GitHub Release in both versioned and versionless form.
 
 With a loader:
 - `<slug>-<version>-<loader>.<ext>`
@@ -30,20 +29,19 @@ Examples:
 - `hm-basic-play-3.2.0.mrpack` and `hm-basic-play.mrpack`
 - `js-green-ores-1.5.0.zip` and `js-green-ores.zip`
 
-Loader names are only included when the artifact actually targets a specific loader/platform. Use `universal` only when one artifact works for all configured targets. Modpack formats are distinguished by extension, not loader.
-
-The versionless assets are attached to each release too. For a stable latest-release URL, use:
+Use `universal` only when the same binary supports all configured targets. Modpack formats are distinguished by extension, not loader. The versionless assets are attached to every release too; stable latest links follow:
 `https://github.com/OWNER/REPOSITORY/releases/latest/download/ASSET_NAME`
 
-## Safety and release rules
+## CI and release behavior
 
-- CI runs builds/tests and uploads downloadable GitHub Actions artifacts; it does not publish to external platforms.
-- Release workflows build from the published release tag and attach all versioned and versionless assets to that GitHub Release.
-- This initial implementation handles CI artifacts and GitHub Release assets. Platform-specific Modrinth, CurseForge, and Hangar publishing adapters are not yet wired into the reusable release workflow; see [platform publishing status](docs/platform-publishing.md).
+- CI builds/tests and uploads downloadable GitHub Actions artifacts; it does not publish externally.
+- Release workflows build from the published tag, generate both filename variants, and attach every variant to that GitHub Release.
+- Optional independent Modrinth and CurseForge jobs publish versioned assets when project IDs and tokens are configured.
+- Hangar needs a separately verified adapter; SpigotMC remains manual.
 - Fork pull requests must never receive publishing tokens.
-- Keep permissions minimal and pin reusable workflow references to a released tag such as `@v1` once this repository has a tested release.
-- Migrate project repositories incrementally. Keep existing workflows until the central version is verified for that project.
+- Pin reusable workflow references to a tested release tag (for example `@v1`) once a tag is published, and set `workflow-ref` to the same tag.
+- Migrate projects incrementally and retain old workflows until each migration is verified.
 
-## Getting started
+## Documentation
 
-See [setup guide](docs/setup.md), [naming rules](docs/naming.md), [secrets](docs/secrets.md), [platform publishing status](docs/platform-publishing.md), [migration plan](docs/migration.md), and [troubleshooting](docs/troubleshooting.md).
+See [setup](docs/setup.md), [naming](docs/naming.md), [secrets](docs/secrets.md), [platform publishing](docs/platform-publishing.md), [migration](docs/migration.md), and [troubleshooting](docs/troubleshooting.md).
