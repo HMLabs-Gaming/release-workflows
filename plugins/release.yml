@@ -24,4 +24,12 @@ jobs:
         mvn -B clean package -DskipTests -Puniversal
         cp target/hmt-sync-*-universal.jar "release-build/hmt-sync-${version}-universal.jar"
       artifacts-json: '[{"path":"release-build/hmt-sync-{version}-spigot.jar","loader":"spigot"},{"path":"release-build/hmt-sync-{version}-velocity.jar","loader":"velocity"},{"path":"release-build/hmt-sync-{version}-universal.jar","loader":"universal"}]'
+      # Hangar publishing is plugin-only. Fill in the real Hangar project slug
+      # and supported platform versions to enable it; empty values skip the job.
+      hangar-project-slug: ""
+      hangar-channel: Release
+      hangar-files: ""
+      hangar-platform-dependencies: '{}'
+      # Example hangar-files for separate Paper and Velocity JARs:
+      # '[{"path":"platform-assets/hmt-sync-*-spigot.jar","platforms":["PAPER"]},{"path":"platform-assets/hmt-sync-*-velocity.jar","platforms":["VELOCITY"]}]'
     secrets: inherit
