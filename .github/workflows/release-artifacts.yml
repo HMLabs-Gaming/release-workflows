@@ -101,6 +101,7 @@ jobs:
     outputs:
       detected-loaders: ${{ steps.pack-metadata.outputs.loaders }}
       detected-game-versions: ${{ steps.pack-metadata.outputs.game-versions }}
+      hangar-platform-dependencies: ${{ steps.hangar-metadata.outputs.platform-dependencies }}
     steps:
       - name: Checkout the published release tag
         uses: actions/checkout@v4
@@ -176,6 +177,41 @@ jobs:
               output.write("game-versions<<DETECTED_GAME_VERSIONS\n")
               output.write("\n".join(game_versions) + "\n")
               output.write("DETECTED_GAME_VERSIONS\n")
+          PY
+      - name: Read Hangar platform compatibility from plugin metadata
+        id: hangar-metadata
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          dependencies = {}
+
+          # Paper's API compatibility version comes from plugin.yml.
+          paper_metadata = Path("src/main/resources/plugin.yml")
+          if paper_metadata.is_file():
+              text = paper_metadata.read_text(encoding="utf-8")
+              match = re.search(r'^\\s*api-version\\s*:\\s*["\']?([^"\'\\s#]+)', text, re.MULTILINE)
+              if match:
+                  dependencies["PAPER"] = [match.group(1)]
+
+          # Velocity server compatibility is explicitly declared in velocity-plugin.json.
+          velocity_metadata = Path("src/main/resources/velocity-plugin.json")
+          if velocity_metadata.is_file():
+              data = json.loads(velocity_metadata.read_text(encoding="utf-8"))
+              versions = data.get("supportedVelocityVersions", [])
+              if isinstance(versions, str):
+                  versions = [versions]
+              if versions:
+                  dependencies["VELOCITY"] = versions
+
+          encoded = json.dumps(dependencies, separators=(",", ":"))
+          print(f"Detected Hangar platform dependencies: {encoded}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"platform-dependencies={encoded}\\n")
           PY
       - name: Set up Java
         if: inputs.use-java
@@ -309,4 +345,4 @@ jobs:
           channel: ${{ inputs.hangar-channel }}
           description: ${{ github.event.release.body }}
           files: ${{ steps.hangar-files.outputs.json }}
-          platform_dependencies: ${{ inputs.hangar-platform-dependencies }}
+          platform_dependencies: ${{ needs.build-and-release.outputs.hangar-platform-dependencies != '' && needs.build-and-release.outputs.hangar-platform-dependencies || inputs.hangar-platform-dependencies }}
