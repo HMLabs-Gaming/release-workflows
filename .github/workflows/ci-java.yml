@@ -1,0 +1,51 @@
+name: Reusable Java CI
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        type: string
+        required: false
+        default: "25"
+      build-command:
+        type: string
+        required: true
+      artifact-paths:
+        description: Newline-separated paths or glob patterns to upload
+        type: string
+        required: true
+      artifact-name:
+        type: string
+        required: false
+        default: build-output
+    permissions:
+      contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout caller repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          cache: maven
+      - name: Run configured build
+        shell: bash
+        env:
+          BUILD_COMMAND: ${{ inputs.build-command }}
+        run: |
+          set -Eeuo pipefail
+          bash -euo pipefail -c "$BUILD_COMMAND"
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.artifact-paths }}
+          if-no-files-found: error
+          compression-level: 0
