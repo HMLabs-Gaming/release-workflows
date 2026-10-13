@@ -194,7 +194,7 @@ jobs:
           paper_metadata = Path("src/main/resources/plugin.yml")
           if paper_metadata.is_file():
               text = paper_metadata.read_text(encoding="utf-8")
-              match = re.search(r'^\\s*api-version\\s*:\\s*["\']?([^"\'\\s#]+)', text, re.MULTILINE)
+              match = re.search(r'^\s*api-version\s*:\s*["\']?([^"\'\s#]+)', text, re.MULTILINE)
               if match:
                   dependencies["PAPER"] = [match.group(1)]
 
@@ -211,7 +211,7 @@ jobs:
           encoded = json.dumps(dependencies, separators=(",", ":"))
           print(f"Detected Hangar platform dependencies: {encoded}")
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
-              output.write(f"platform-dependencies={encoded}\\n")
+              output.write(f"platform-dependencies={encoded}\n")
           PY
       - name: Set up Java
         if: inputs.use-java
