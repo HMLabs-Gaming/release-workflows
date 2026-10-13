@@ -15,3 +15,4 @@ jobs:
       java-version: "21"
       build-command: "./gradlew --no-daemon build"
       artifacts-json: '[{"path":"build/libs/example-mod.jar","loader":"fabric"}]'
+    secrets: inherit
