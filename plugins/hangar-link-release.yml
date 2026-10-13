@@ -1,0 +1,33 @@
+# Example: publish a GitHub Release download URL to Hangar without uploading the file.
+# Copy this file to .github/workflows/release.yml in the consuming plugin repository.
+name: Hangar Link Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/release-artifacts.yml@main
+    with:
+      project-slug: example-plugin
+      java-version: "25"
+      build-command: |
+        set -Eeuo pipefail
+        version="${GITHUB_REF_NAME#v}"
+        mkdir -p release-build
+        mvn -B clean package -DskipTests
+        cp "target/example-plugin-${version}.jar" "release-build/example-plugin-${version}.jar"
+
+      artifacts-json: '[{"path":"release-build/example-plugin-{version}.jar"}]'
+
+      hangar-project-slug: ExamplePlugin
+      hangar-channel: Release
+      # The JAR stays hosted on GitHub Releases. It is not uploaded to Hangar.
+      # {tag} expands to the release tag (for example v1.2.3);
+      # {version} expands to the tag without a leading v (for example 1.2.3).
+      hangar-files: '[{"platforms":["PAPER"],"url":true,"externalUrl":"https://github.com/OWNER/REPOSITORY/releases/download/{tag}/example-plugin-{version}.jar"}]'
+    secrets: inherit
