@@ -24,4 +24,4 @@ jobs:
         cp target/hmt-sync-*-universal.jar build-artifacts/
       artifact-paths: |
         build-artifacts/*.jar
-      artifact-name: hmt-sync-builds
+      artifact-name: plugin-builds
