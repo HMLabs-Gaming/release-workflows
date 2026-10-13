@@ -1,5 +1,7 @@
 # Example: publish a GitHub Release download URL to Hangar without uploading the file.
 # Copy this file to .github/workflows/release.yml in the consuming plugin repository.
+# Hangar compatibility is detected from src/main/resources/plugin.yml (Paper api-version)
+# and velocity-plugin.json (supportedVelocityVersions) when those files exist.
 name: Hangar Link Release
 
 on:
@@ -29,5 +31,7 @@ jobs:
       # The JAR stays hosted on GitHub Releases. It is not uploaded to Hangar.
       # {tag} expands to the release tag (for example v1.2.3);
       # {version} expands to the tag without a leading v (for example 1.2.3).
+      # Platform compatibility is read from plugin.yml and velocity-plugin.json.
+      # Set hangar-platform-dependencies only to override automatic detection.
       hangar-files: '[{"platforms":["PAPER"],"url":true,"externalUrl":"https://github.com/OWNER/REPOSITORY/releases/download/{tag}/example-plugin-{version}.jar"}]'
     secrets: inherit
