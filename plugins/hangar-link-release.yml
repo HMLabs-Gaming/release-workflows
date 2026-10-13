@@ -29,5 +29,5 @@ jobs:
       # The JAR stays hosted on GitHub Releases. It is not uploaded to Hangar.
       # {tag} expands to the release tag (for example v1.2.3);
       # {version} expands to the tag without a leading v (for example 1.2.3).
-      hangar-files: '[{"platforms":["PAPER"],"url":true,"externalURL":"https://github.com/OWNER/REPOSITORY/releases/download/{tag}/example-plugin-{version}.jar"}]'
+      hangar-files: '[{"platforms":["PAPER"],"url":true,"externalUrl":"https://github.com/OWNER/REPOSITORY/releases/download/{tag}/example-plugin-{version}.jar"}]'
     secrets: inherit
