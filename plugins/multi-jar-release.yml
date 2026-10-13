@@ -1,6 +1,8 @@
 # Caller example: copy to the consuming plugin repository at .github/workflows/release.yml.
 # Multi-JAR example for plugins that build distinct Spigot, Velocity, and universal artifacts.
 # Keep only the profiles/artifacts that your plugin really supports.
+# Hangar compatibility is detected from src/main/resources/plugin.yml (Paper api-version)
+# and velocity-plugin.json (supportedVelocityVersions) when those files exist.
 name: Multi-JAR Plugin Release
 on:
   release:
@@ -35,8 +37,10 @@ jobs:
 
       # Optional: enable Hangar only if the project is published there.
       # Configure the files/platforms to match the variants supported by your plugin.
-      # hangar-project-slug: example-plugin
+      # Compatibility versions are read automatically from plugin.yml and velocity-plugin.json.
+      # Uncomment and configure these when publishing to Hangar:
+      # hangar-project-slug: ExamplePlugin
       # hangar-channel: Release
       # hangar-files: '[{"path":"platform-assets/example-plugin-*-spigot.jar","platforms":["PAPER"]}]'
-      # hangar-platform-dependencies: '{"PAPER":[">=1.21"]}'
+      # hangar-platform-dependencies: '{}'
     secrets: inherit
