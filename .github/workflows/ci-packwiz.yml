@@ -23,7 +23,7 @@ on:
         type: string
         required: false
         default: modpack-build-output
-jobs:
+
 permissions:
   contents: read
 
