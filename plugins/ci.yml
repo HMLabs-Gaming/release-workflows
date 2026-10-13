@@ -1,4 +1,5 @@
 # Caller example: copy to the consuming plugin repository at .github/workflows/ci.yml.
+# Default CI example for a single Spigot plugin.
 name: Plugin CI
 on:
   push:
@@ -15,13 +16,7 @@ jobs:
       java-version: "25"
       build-command: |
         set -Eeuo pipefail
-        mkdir -p build-artifacts
-        mvn -B clean package -DskipTests -Pspigot
-        cp target/hmt-sync-*-spigot.jar build-artifacts/
-        mvn -B clean package -DskipTests -Pvelocity
-        cp target/hmt-sync-*-velocity.jar build-artifacts/
-        mvn -B clean package -DskipTests -Puniversal
-        cp target/hmt-sync-*-universal.jar build-artifacts/
+        mvn -B clean package -DskipTests
       artifact-paths: |
-        build-artifacts/*.jar
+        target/*.jar
       artifact-name: plugin-builds
