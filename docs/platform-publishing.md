@@ -1,11 +1,14 @@
-# Platform publishing status
+# Platform publishing
 
-The first implementation establishes reusable CI and release-asset generation. The generic release workflow attaches both filename variants to GitHub Releases.
+The reusable release workflow supports optional, independent Modrinth and CurseForge publisher jobs. These jobs only run when the corresponding project ID is configured.
 
-External publishing adapters are a separate follow-up because each platform has different required metadata and artifact rules:
-- **Modrinth:** project ID, token, version type, supported game versions/loaders, and platform-specific file selection.
-- **CurseForge:** project ID, token, game versions/loaders, and release type.
-- **Hangar:** project ID, API token, platform-specific version metadata and supported upload action.
-- **SpigotMC:** remains manual; no supported API automation is assumed.
+Configure the following reusable-workflow inputs in a project caller:
+- `modrinth-project-id`
+- `curseforge-project-id`
+- `version-type` (`release`, `beta`, or `alpha`)
+- `loaders` (newline-separated platform loader IDs)
+- `game-versions` (newline-separated Minecraft versions)
 
-Do not add a publisher to a project until its project IDs and metadata are configured and a test release can be verified. Publisher jobs should be independent so a platform failure does not undo successfully attached GitHub Release assets. Keep all tokens in consuming-repository Actions secrets.
+Pass project repository secrets using `secrets: inherit`, or explicitly map `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN`. A configured project ID without its matching token should fail visibly. The publisher jobs upload only the versioned build files; both versioned and versionless files are attached to the GitHub Release.
+
+Hangar still needs a separately verified adapter and project metadata. SpigotMC remains manual; no unsupported API automation is assumed. Keep publisher jobs independent so a platform failure does not remove successfully attached GitHub Release assets.
