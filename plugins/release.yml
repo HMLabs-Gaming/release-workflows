@@ -13,5 +13,14 @@ jobs:
     with:
       project-slug: hmt-sync
       java-version: "25"
-      build-command: "mvn -B -DskipTests package -Pspigot -Pvelocity -Puniversal"
-      artifacts-json: '[{"path":"target/hmt-sync-1.0.2-spigot.jar","loader":"spigot"},{"path":"target/hmt-sync-1.0.2-velocity.jar","loader":"velocity"},{"path":"target/hmt-sync-1.0.2-universal.jar","loader":"universal"}]'
+      build-command: |
+        set -Eeuo pipefail
+        version="${GITHUB_REF_NAME#v}"
+        mkdir -p release-build
+        mvn -B clean package -DskipTests -Pspigot
+        cp target/hmt-sync-*-spigot.jar "release-build/hmt-sync-${version}-spigot.jar"
+        mvn -B clean package -DskipTests -Pvelocity
+        cp target/hmt-sync-*-velocity.jar "release-build/hmt-sync-${version}-velocity.jar"
+        mvn -B clean package -DskipTests -Puniversal
+        cp target/hmt-sync-*-universal.jar "release-build/hmt-sync-${version}-universal.jar"
+      artifacts-json: '[{"path":"release-build/hmt-sync-{version}-spigot.jar","loader":"spigot"},{"path":"release-build/hmt-sync-{version}-velocity.jar","loader":"velocity"},{"path":"release-build/hmt-sync-{version}-universal.jar","loader":"universal"}]'
