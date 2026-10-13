@@ -1,10 +1,12 @@
 # Secrets and permissions
 
-The initial generic CI and GitHub Release asset workflows require no third-party publishing tokens.
+CI does not need third-party publishing tokens. GitHub Release asset upload uses the caller repository's `GITHUB_TOKEN` with `contents: write`.
 
-When platform publishing adapters are added/configured, store tokens in each consuming project repository's GitHub Actions secrets:
+For optional platform publishing, store tokens in each consuming project's GitHub Actions secrets:
 - `MODRINTH_TOKEN`
 - `CURSEFORGE_TOKEN`
-- `HANGAR_API_TOKEN`
+- `HANGAR_API_TOKEN` (reserved for a separately verified Hangar adapter)
 
-Use the minimum permissions needed. Do not place tokens in repository files, workflow inputs, logs, artifacts, or release notes. Do not expose secrets to pull requests from forks. A GitHub Release upload uses the caller repository's `GITHUB_TOKEN` with `contents: write` scoped to the release job.
+The reusable release workflow supports optional Modrinth and CurseForge jobs. Configure the matching project ID and pass secrets with `secrets: inherit`, or map the required secrets explicitly.
+
+Use the minimum permissions needed. Do not place tokens in repository files, workflow inputs, logs, artifacts, or release notes. Never expose secrets to pull requests from forks.
