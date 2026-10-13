@@ -1,0 +1,39 @@
+name: Reusable Resource Pack CI
+
+on:
+  workflow_call:
+    inputs:
+      validate-command:
+        description: Command that validates or creates the resource-pack ZIP
+        type: string
+        required: true
+      artifact-paths:
+        description: Newline-separated paths or glob patterns to upload
+        type: string
+        required: true
+      artifact-name:
+        type: string
+        required: false
+        default: resourcepack-build-output
+    permissions:
+      contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate and package resource pack
+        shell: bash
+        env:
+          VALIDATE_COMMAND: ${{ inputs.validate-command }}
+        run: bash -euo pipefail -c "$VALIDATE_COMMAND"
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.artifact-paths }}
+          if-no-files-found: error
+          compression-level: 0
