@@ -1,0 +1,42 @@
+# Caller example: copy to the consuming plugin repository at .github/workflows/release.yml.
+# Multi-JAR example for plugins that build distinct Spigot, Velocity, and universal artifacts.
+# Keep only the profiles/artifacts that your plugin really supports.
+name: Multi-JAR Plugin Release
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/release-artifacts.yml@main
+    with:
+      project-slug: example-plugin
+      java-version: "25"
+      build-command: |
+        set -Eeuo pipefail
+        version="${GITHUB_REF_NAME#v}"
+        mkdir -p release-build
+
+        # Build each profile separately. The clean build prevents platform metadata
+        # from one profile leaking into another profile's JAR.
+        mvn -B clean package -DskipTests -Pspigot
+        cp "target/example-plugin-${version}-spigot.jar" "release-build/example-plugin-${version}-spigot.jar"
+
+        mvn -B clean package -DskipTests -Pvelocity
+        cp "target/example-plugin-${version}-velocity.jar" "release-build/example-plugin-${version}-velocity.jar"
+
+        mvn -B clean package -DskipTests -Puniversal
+        cp "target/example-plugin-${version}-universal.jar" "release-build/example-plugin-${version}-universal.jar"
+
+      artifacts-json: '[{"path":"release-build/example-plugin-{version}-spigot.jar","loader":"spigot"},{"path":"release-build/example-plugin-{version}-velocity.jar","loader":"velocity"},{"path":"release-build/example-plugin-{version}-universal.jar","loader":"universal"}]'
+
+      # Optional: enable Hangar only if the project is published there.
+      # Configure the files/platforms to match the variants supported by your plugin.
+      # hangar-project-slug: example-plugin
+      # hangar-channel: Release
+      # hangar-files: '[{"path":"platform-assets/example-plugin-*-spigot.jar","platforms":["PAPER"]}]'
+      # hangar-platform-dependencies: '{"PAPER":[">=1.21"]}'
+    secrets: inherit
