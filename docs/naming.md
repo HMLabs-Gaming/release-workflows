@@ -9,7 +9,7 @@ Each final build output is published twice to the **same GitHub Release**: a ver
 
 Examples:
 - `hmt-sync-1.0.2-spigot.jar` and `hmt-sync-spigot.jar`
-- `example-plugin-1.0.2-paper.jar` and `example-plugin-paper.jar`
+- `example-plugin-1.0.2-spigot.jar` and `example-plugin-spigot.jar`
 - `example-mod-2.4.0-fabric.jar` and `example-mod-fabric.jar`
 - `hm-basic-play-3.2.0.mrpack` and `hm-basic-play.mrpack`
 - `hm-basic-play-3.2.0.zip` and `hm-basic-play.zip`
@@ -17,12 +17,12 @@ Examples:
 
 ## Plugin platform variants
 
-Only configure artifacts for platform variants that the plugin actually supports and builds. A Paper-only plugin should publish only its Paper JAR; a Spigot-only plugin should publish only its Spigot JAR. Do not add `universal`, `velocity`, `spigot`, or `paper` variants just because those labels are available.
+Only configure artifacts for platform variants that the plugin actually supports and builds. A Paper-only plugin should publish only its Paper JAR; a Spigot-only plugin should publish only its Spigot JAR. The default single-plugin examples are [`plugins/ci.yml`](../plugins/ci.yml) and [`plugins/release.yml`](../plugins/release.yml); both target Spigot. For a plugin that builds separate Spigot, Velocity, and universal JARs, use [`plugins/multi-jar-ci.yml`](../plugins/multi-jar-ci.yml) and [`plugins/multi-jar-release.yml`](../plugins/multi-jar-release.yml). Do not add `universal`, `velocity`, `spigot`, or `paper` variants just because those labels are available.
 
 Use the `loader` field as the platform label in the release asset name, for example:
 
 ```yaml
-artifacts-json: '[{"path":"release-build/example-plugin-{version}-paper.jar","loader":"paper"}]'
+artifacts-json: '[{"path":"release-build/example-plugin-{version}-spigot.jar","loader":"spigot"}]'
 ```
 
 The source path must match the real output of the build command. Rename or copy the built JAR to that path in `build-command` if necessary. The label is for naming; it does not build or convert a platform-specific JAR.
