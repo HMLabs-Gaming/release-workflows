@@ -1,0 +1,35 @@
+# Caller example: copy to the consuming plugin repository at .github/workflows/ci.yml.
+# Multi-JAR CI example for plugins that build distinct Spigot, Velocity, and universal artifacts.
+# Keep only the profiles/artifacts that your plugin really supports.
+name: Multi-JAR Plugin CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-java.yml@main
+    with:
+      java-version: "25"
+      build-command: |
+        set -Eeuo pipefail
+        mkdir -p release-build
+
+        # Build each profile separately. The clean build prevents platform metadata
+        # from one profile leaking into another profile's JAR.
+        mvn -B clean package -DskipTests -Pspigot
+        cp target/example-plugin-*-spigot.jar release-build/
+
+        mvn -B clean package -DskipTests -Pvelocity
+        cp target/example-plugin-*-velocity.jar release-build/
+
+        mvn -B clean package -DskipTests -Puniversal
+        cp target/example-plugin-*-universal.jar release-build/
+
+      artifact-paths: |
+        release-build/*.jar
+      artifact-name: plugin-builds
