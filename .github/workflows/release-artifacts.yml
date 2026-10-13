@@ -12,7 +12,7 @@ on:
         type: string
         required: true
       artifacts-json:
-        description: JSON array such as [{"path":"target/plugin.jar","loader":"universal"}]
+        description: JSON array of built paths and optional loader names
         type: string
         required: true
       workflow-ref:
@@ -36,6 +36,36 @@ on:
         type: boolean
         required: false
         default: false
+      modrinth-project-id:
+        description: Optional Modrinth project ID; leave empty to disable publishing
+        type: string
+        required: false
+        default: ""
+      curseforge-project-id:
+        description: Optional CurseForge project ID; leave empty to disable publishing
+        type: string
+        required: false
+        default: ""
+      version-type:
+        description: release, beta, or alpha
+        type: string
+        required: false
+        default: release
+      loaders:
+        description: Newline-separated loader list for platform metadata
+        type: string
+        required: false
+        default: ""
+      game-versions:
+        description: Newline-separated Minecraft game versions
+        type: string
+        required: false
+        default: ""
+    secrets:
+      MODRINTH_TOKEN:
+        required: false
+      CURSEFORGE_TOKEN:
+        required: false
 
 permissions:
   contents: write
@@ -89,3 +119,58 @@ jobs:
           files: release-assets/*
           fail_on_unmatched_files: true
           overwrite_files: true
+      - name: Upload versioned files for platform publishers
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-publish-assets
+          path: platform-assets/*
+          if-no-files-found: error
+          compression-level: 0
+
+  publish-modrinth:
+    needs: build-and-release
+    if: inputs.modrinth-project-id != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download versioned release files
+        uses: actions/download-artifact@v4
+        with:
+          name: platform-publish-assets
+          path: platform-assets
+      - name: Publish to Modrinth
+        uses: Kira-NT/mc-publish@v3
+        with:
+          modrinth-id: ${{ inputs.modrinth-project-id }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          files: platform-assets/*
+          name: ${{ github.event.release.name || github.event.release.tag_name }}
+          version: ${{ github.event.release.tag_name }}
+          version-type: ${{ inputs.version-type }}
+          loaders: ${{ inputs.loaders }}
+          game-versions: ${{ inputs.game-versions }}
+
+  publish-curseforge:
+    needs: build-and-release
+    if: inputs.curseforge-project-id != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download versioned release files
+        uses: actions/download-artifact@v4
+        with:
+          name: platform-publish-assets
+          path: platform-assets
+      - name: Publish to CurseForge
+        uses: Kira-NT/mc-publish@v3
+        with:
+          curseforge-id: ${{ inputs.curseforge-project-id }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          files: platform-assets/*
+          name: ${{ github.event.release.name || github.event.release.tag_name }}
+          version: ${{ github.event.release.tag_name }}
+          version-type: ${{ inputs.version-type }}
+          loaders: ${{ inputs.loaders }}
+          game-versions: ${{ inputs.game-versions }}
