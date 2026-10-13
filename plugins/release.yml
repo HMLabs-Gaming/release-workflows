@@ -1,0 +1,17 @@
+# Caller example: copy to the consuming plugin repository at .github/workflows/release.yml.
+name: Plugin Release
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/release-artifacts.yml@main
+    with:
+      project-slug: hmt-sync
+      java-version: "25"
+      build-command: "mvn -B -DskipTests package -Pspigot -Pvelocity -Puniversal"
+      artifacts-json: '[{"path":"target/hmt-sync-1.0.2-spigot.jar","loader":"spigot"},{"path":"target/hmt-sync-1.0.2-velocity.jar","loader":"velocity"},{"path":"target/hmt-sync-1.0.2-universal.jar","loader":"universal"}]'
