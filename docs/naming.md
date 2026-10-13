@@ -27,6 +27,8 @@ artifacts-json: '[{"path":"release-build/example-plugin-{version}-paper.jar","lo
 
 The source path must match the real output of the build command. Rename or copy the built JAR to that path in `build-command` if necessary. The label is for naming; it does not build or convert a platform-specific JAR.
 
+For a multi-JAR Maven example that builds separate Spigot, Velocity, and universal artifacts, see [`plugins/multi-jar-release.yml`](../plugins/multi-jar-release.yml). It builds each profile separately and copies each output into `release-build/` before the reusable workflow packages the release assets. The universal JAR is included as an example only; publish it only if it is genuinely safe and useful for your project. HMTSync's build guide warns that its universal JAR is intended for development/testing and may cause conflicts on production servers.
+
 ## Source artifact paths
 
 In `artifacts-json`, use the `{version}` placeholder whenever the built file itself contains the release version, for example:
