@@ -1,0 +1,79 @@
+name: Reusable Release Artifact Builder
+
+on:
+  workflow_call:
+    inputs:
+      project-slug:
+        description: Lowercase kebab-case artifact slug
+        type: string
+        required: true
+      build-command:
+        description: Trusted maintainer-configured command to build/export release files
+        type: string
+        required: true
+      artifacts-json:
+        description: JSON array such as [{"path":"target/plugin.jar","loader":"universal"}]
+        type: string
+        required: true
+      java-version:
+        type: string
+        required: false
+        default: "25"
+      use-java:
+        type: boolean
+        required: false
+        default: true
+      go-version:
+        type: string
+        required: false
+        default: "1.22"
+      use-go:
+        type: boolean
+        required: false
+        default: false
+    permissions:
+      contents: write
+
+jobs:
+  build-and-release:
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout the published release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - name: Set up Java
+        if: inputs.use-java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          cache: maven
+      - name: Set up Go
+        if: inputs.use-go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}
+      - name: Run configured release build
+        shell: bash
+        env:
+          BUILD_COMMAND: ${{ inputs.build-command }}
+        run: bash -euo pipefail -c "$BUILD_COMMAND"
+      - name: Prepare versioned and versionless assets
+        shell: bash
+        env:
+          PROJECT_SLUG: ${{ inputs.project-slug }}
+          RELEASE_VERSION: ${{ github.event.release.tag_name }}
+          ARTIFACTS_JSON: ${{ inputs.artifacts-json }}
+        run: bash "${{ github.action_path }}/scripts/prepare-release-assets.sh"
+      - name: Attach every asset to this GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: release-assets/*
+          fail_on_unmatched_files: true
+          overwrite_files: true
