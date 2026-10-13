@@ -6,7 +6,7 @@ set -Eeuo pipefail
 : "${ARTIFACTS_JSON:?ARTIFACTS_JSON is required}"
 
 python3 - <<'PY'
-import json, os, pathlib, re, shutil, sys
+import json, os, pathlib, re, shutil
 
 slug = os.environ["PROJECT_SLUG"].strip().lower()
 version = os.environ["RELEASE_VERSION"].strip().removeprefix("v")
@@ -38,12 +38,10 @@ for item in artifacts:
     ext = src.suffix
     if not ext:
         raise SystemExit(f"Artifact has no extension: {src}")
-    base = f"{slug}-{loader.lower()}" if loader else slug
-    names = [f"{base.rsplit('-', 1)[0]}-{version}-{loader.lower()}{ext}" if loader else f"{slug}-{version}{ext}",
-             f"{base}{ext}"]
-    # Explicitly avoid confusing a loader suffix with the project slug.
     if loader:
         names = [f"{slug}-{version}-{loader.lower()}{ext}", f"{slug}-{loader.lower()}{ext}"]
+    else:
+        names = [f"{slug}-{version}{ext}", f"{slug}{ext}"]
     for name in names:
         if name in seen:
             raise SystemExit(f"Duplicate output filename: {name}")
