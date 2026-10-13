@@ -16,7 +16,7 @@ jobs:
       java-version: "25"
       build-command: |
         set -Eeuo pipefail
-        mvn -B clean package -DskipTests
+        mvn -B clean package -DskipTests -Pspigot
       artifact-paths: |
         target/*.jar
       artifact-name: plugin-builds
