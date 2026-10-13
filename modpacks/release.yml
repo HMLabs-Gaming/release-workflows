@@ -19,3 +19,4 @@ jobs:
         (cd platforms/modrinth && packwiz modrinth export)
         (cd platforms/curseforge && packwiz curseforge export)
       artifacts-json: '[{"path":"platforms/modrinth/example-modpack.mrpack"},{"path":"platforms/curseforge/example-modpack.zip"}]'
+    secrets: inherit
