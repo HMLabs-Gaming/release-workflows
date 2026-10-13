@@ -17,7 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check shell syntax
         run: |
-          bash -n scripts/prepare-release-assets.sh
+          bash -n scripts/prepare-release-assets.sh scripts/test-prepare-release-assets.sh
+          bash scripts/test-prepare-release-assets.sh
       - name: Check release workflow paths and naming docs
         run: |
           test -f .github/workflows/ci-java.yml
