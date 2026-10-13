@@ -19,7 +19,7 @@ A project release caller should run on `release: types: [published]` and call `r
 Example artifacts JSON:
 `[{"path":"target/hmt-sync-1.0.2-spigot.jar","loader":"spigot"},{"path":"target/hmt-sync-1.0.2-velocity.jar","loader":"velocity"},{"path":"target/hmt-sync-1.0.2-universal.jar","loader":"universal"}]`
 
-Build commands are executable shell input. Only trusted maintainers should edit caller workflows or their build commands.
+Optional platform publishing can be enabled with `modrinth-project-id` and/or `curseforge-project-id`, plus `version-type`, `loaders`, and `game-versions`. Add `secrets: inherit` to the caller job and configure `MODRINTH_TOKEN` / `CURSEFORGE_TOKEN` in the consuming repository. Each platform publisher is a separate job. Hangar is not yet wired into the reusable workflow.\n\nWhen pinning a caller to `@v1`, also set `workflow-ref: v1` so the naming script comes from the same tagged version.\n\nBuild commands are executable shell input. Only trusted maintainers should edit caller workflows or their build commands.
 
 ## First-time repository configuration
 
