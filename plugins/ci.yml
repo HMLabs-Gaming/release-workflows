@@ -1,0 +1,19 @@
+# Caller example: copy to the consuming plugin repository at .github/workflows/ci.yml.
+name: Plugin CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-java.yml@main
+    with:
+      java-version: "25"
+      build-command: "mvn -B verify -Pspigot"
+      artifact-paths: |
+        target/*.jar
+      artifact-name: plugin-build
