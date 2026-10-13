@@ -23,8 +23,9 @@ on:
         type: string
         required: false
         default: modpack-build-output
-    permissions:
-      contents: read
+jobs:
+permissions:
+  contents: read
 
 jobs:
   build:
