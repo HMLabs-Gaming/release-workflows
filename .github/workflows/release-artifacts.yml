@@ -132,7 +132,7 @@ jobs:
           properties = Path("gradle.properties")
           if properties.is_file():
               text = properties.read_text(encoding="utf-8")
-              match = re.search(r"^\\s*minecraft_version\\s*=\\s*([^\\s#]+)", text, re.MULTILINE)
+              match = re.search(r"^\s*minecraft_version\s*=\s*([^\s#]+)", text, re.MULTILINE)
               if match:
                   game_versions = [match.group(1)]
                   loaders = ["fabric"]
@@ -146,7 +146,7 @@ jobs:
                   if isinstance(dependency, str):
                       # Platform metadata needs concrete version labels. Extract the
                       # version token from common Fabric constraints such as "~1.21.4".
-                      match = re.search(r"\\d+(?:\\.\\d+){1,3}", dependency)
+                      match = re.search(r"\d+(?:\.\d+){1,3}", dependency)
                       if match:
                           game_versions = [match.group(0)]
                           loaders = ["fabric"]
@@ -170,12 +170,12 @@ jobs:
 
           print(f"Detected loaders={loaders}, game_versions={game_versions}")
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write("loaders<<DETECTED_LOADERS\\n")
-              output.write("\\n".join(loaders) + "\\n")
-              output.write("DETECTED_LOADERS\\n")
-              output.write("game-versions<<DETECTED_GAME_VERSIONS\\n")
-              output.write("\\n".join(game_versions) + "\\n")
-              output.write("DETECTED_GAME_VERSIONS\\n")
+              output.write("loaders<<DETECTED_LOADERS\n")
+              output.write("\n".join(loaders) + "\n")
+              output.write("DETECTED_LOADERS\n")
+              output.write("game-versions<<DETECTED_GAME_VERSIONS\n")
+              output.write("\n".join(game_versions) + "\n")
+              output.write("DETECTED_GAME_VERSIONS\n")
           PY
       - name: Set up Java
         if: inputs.use-java
