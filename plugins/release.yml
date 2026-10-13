@@ -20,7 +20,7 @@ jobs:
         version="${GITHUB_REF_NAME#v}"
         mkdir -p release-build
         mvn -B clean package -DskipTests
-        cp target/example-plugin-*.jar "release-build/example-plugin-${version}-paper.jar"
+        cp "target/example-plugin-${version}.jar" "release-build/example-plugin-${version}-paper.jar"
       artifacts-json: '[{"path":"release-build/example-plugin-{version}-paper.jar","loader":"paper"}]'
       # Optional: enable Hangar only if this plugin is published there.
       # hangar-project-slug: example-plugin
