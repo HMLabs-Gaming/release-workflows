@@ -1,0 +1,17 @@
+# Caller example: copy to the consuming mod repository at .github/workflows/release.yml.
+name: Mod Release
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/release-artifacts.yml@main
+    with:
+      project-slug: example-mod
+      java-version: "21"
+      build-command: "./gradlew --no-daemon build"
+      artifacts-json: '[{"path":"build/libs/example-mod.jar","loader":"fabric"}]'
