@@ -175,7 +175,7 @@ jobs:
               plugin_metadata = Path("src/main/resources/plugin.yml")
               if plugin_metadata.is_file():
                   text = plugin_metadata.read_text(encoding="utf-8")
-                  match = re.search(r"^\\s*api-version\\s*:\\s*[\"']?([^\"'\\s#]+)", text, re.MULTILINE)
+                  match = re.search(r"^\s*api-version\s*:\s*[\"']?([^\"'\s#]+)", text, re.MULTILINE)
                   if match:
                       game_versions = [match.group(1)]
                       loaders = ["paper"]
