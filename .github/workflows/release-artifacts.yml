@@ -36,8 +36,9 @@ on:
         type: boolean
         required: false
         default: false
-    permissions:
-      contents: write
+jobs:
+permissions:
+  contents: write
 
 jobs:
   build-and-release:
