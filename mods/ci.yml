@@ -1,0 +1,19 @@
+# Caller example: copy to the consuming mod repository at .github/workflows/ci.yml.
+name: Mod CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-java.yml@main
+    with:
+      java-version: "21"
+      build-command: "./gradlew --no-daemon build"
+      artifact-paths: |
+        build/libs/*.jar
+      artifact-name: mod-build
