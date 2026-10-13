@@ -275,6 +275,31 @@ jobs:
         with:
           name: platform-publish-assets
           path: platform-assets
+      - name: Resolve Hangar external-link placeholders
+        id: hangar-files
+        if: inputs.hangar-project-slug != '' && inputs.hangar-files != ''
+        shell: bash
+        env:
+          HANGAR_FILES_JSON: ${{ inputs.hangar-files }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+
+          tag = os.environ["RELEASE_TAG"]
+          version = re.sub(r"^v", "", tag)
+          files = json.loads(os.environ["HANGAR_FILES_JSON"])
+          for item in files:
+              for key in ("path", "externalUrl"):
+                  if key in item:
+                      item[key] = item[key].replace("{tag}", tag).replace("{version}", version)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("json<<HANGAR_FILES_JSON\n")
+              output.write(json.dumps(files, separators=(",", ":")) + "\n")
+              output.write("HANGAR_FILES_JSON\n")
+          PY
       - name: Publish plugin to Hangar
         uses: HMLabs-Gaming/Hangar-Publish@v2.3.0
         with:
@@ -283,5 +308,5 @@ jobs:
           version: ${{ github.event.release.tag_name }}
           channel: ${{ inputs.hangar-channel }}
           description: ${{ github.event.release.body }}
-          files: ${{ inputs.hangar-files }}
+          files: ${{ steps.hangar-files.outputs.json }}
           platform_dependencies: ${{ inputs.hangar-platform-dependencies }}
