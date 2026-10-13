@@ -4,4 +4,4 @@ Use `ci.yml` and `release.yml` as caller examples. The central reusable workflow
 
 Configure Java version and build command per project. Artifact JSON should list each output independently and include `loader` such as `spigot`, `paper`, `velocity`, or `universal` only when that label accurately describes the file.
 
-HMTSync is the planned pilot. Keep Hangar, Modrinth, and CurseForge publishing configured per project; SpigotMC remains manual.
+Hangar is supported for plugins only. Set the actual Hangar project slug, channel, versioned file-to-platform mappings, platform version metadata, and the `HANGAR_API_TOKEN` Actions secret in the consuming plugin repository. Leave Hangar settings empty to disable the publisher. SpigotMC remains manual.
