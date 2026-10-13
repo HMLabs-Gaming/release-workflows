@@ -1,0 +1,55 @@
+name: Reusable Packwiz CI
+
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        type: string
+        required: false
+        default: "1.22"
+      packwiz-install-command:
+        type: string
+        required: false
+        default: "go install github.com/packwiz/packwiz@latest"
+      validate-command:
+        type: string
+        required: false
+        default: "packwiz --help"
+      artifact-paths:
+        description: Newline-separated paths or glob patterns to upload
+        type: string
+        required: true
+      artifact-name:
+        type: string
+        required: false
+        default: modpack-build-output
+    permissions:
+      contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}
+      - name: Install Packwiz
+        shell: bash
+        env:
+          INSTALL_COMMAND: ${{ inputs.packwiz-install-command }}
+        run: bash -euo pipefail -c "$INSTALL_COMMAND"
+      - name: Validate project
+        shell: bash
+        env:
+          VALIDATE_COMMAND: ${{ inputs.validate-command }}
+        run: bash -euo pipefail -c "$VALIDATE_COMMAND"
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.artifact-paths }}
+          if-no-files-found: error
+          compression-level: 0
