@@ -14,5 +14,5 @@ jobs:
       project-slug: example-mod
       java-version: "25"
       build-command: "bash ./gradlew --no-daemon build"
-      artifacts-json: '[{"path":"build/libs/example-mod.jar","loader":"fabric"}]'
+      artifacts-json: '[{"path":"build/libs/example-mod-{version}.jar","loader":"fabric"}]'
     secrets: inherit
