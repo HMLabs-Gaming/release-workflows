@@ -26,16 +26,6 @@ jobs:
       project-slug: example-resourcepack
       use-java: false
       build-command: |
-        set -Eeuo pipefail
-
-        version="$(python3 -c 'import json; print(json.load(open("meta.json", encoding="utf-8"))["version"])')"
-        tag_version="${GITHUB_REF_NAME#v}"
-
-        if [ "$version" != "$tag_version" ]; then
-          echo "::error::meta.json version ($version) does not match the release tag ($tag_version)."
-          exit 1
-        fi
-
-        zip -qr "example-resourcepack-${version}.zip" pack.mcmeta assets pack.png
+        bash .release-workflows/scripts/build-resourcepack.sh
       artifacts-json: '[{"path":"example-resourcepack-{version}.zip"}]'
     secrets: inherit
