@@ -144,10 +144,10 @@ jobs:
                   game_versions = [f"[{minecraft_from},{minecraft_to}]"]
               elif minecraft_from:
                   game_versions = [str(minecraft_from)]
-              # CurseForge requires the Resource Pack loader/category. Modrinth's
-              # mc-publish loader field does not accept "resourcepack"; the
-              # Modrinth project type already identifies the project as a resource pack.
-              loaders = ["resourcepack"]
+              # Modrinth's API uses "minecraft" as the loader for resource-pack
+              # versions. CurseForge uses "resourcepack" for the same project type.
+              loaders = ["minecraft"]
+              modrinth_loaders = ["minecraft"]
               curseforge_loaders = ["resourcepack"]
               print(f"Detected resource-pack metadata from {resource_metadata}")
 
