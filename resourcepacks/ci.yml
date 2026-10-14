@@ -12,7 +12,7 @@ jobs:
   ci:
     uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-resourcepack.yml@main
     with:
-      validate-command: "test -f pack.mcmeta && zip -qr resourcepack.zip pack.mcmeta assets icon.png"
+      validate-command: "test -f pack.mcmeta && zip -qr resourcepack.zip pack.mcmeta assets pack.png"
       artifact-paths: |
         resourcepack.zip
       artifact-name: resourcepack-build
