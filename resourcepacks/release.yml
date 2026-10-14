@@ -25,6 +25,7 @@ jobs:
     with:
       project-slug: example-resourcepack
       use-java: false
+      loaders: resourcepack
       build-command: |
         bash .release-workflows/scripts/build-resourcepack.sh
       artifacts-json: '[{"path":"example-resourcepack-{version}.zip"}]'
