@@ -129,9 +129,24 @@ jobs:
           loaders = []
           game_versions = []
 
+          # Resource-pack metadata: meta.json is intentionally outside the ZIP.
+          resource_metadata = Path("meta.json")
+          if resource_metadata.is_file():
+              data = json.loads(resource_metadata.read_text(encoding="utf-8"))
+              minecraft = data.get("minecraft", {})
+              minecraft_from = minecraft.get("from")
+              minecraft_to = minecraft.get("to")
+              if minecraft_from and minecraft_to:
+                  # mc-publish accepts version ranges such as [1.13,1.21.4).
+                  game_versions = [f"[{minecraft_from},{minecraft_to}]"]
+              elif minecraft_from:
+                  game_versions = [str(minecraft_from)]
+              loaders = ["resourcepack"]
+              print(f"Detected resource-pack metadata from {resource_metadata}")
+
           # For Fabric/Gradle mods, gradle.properties is the most direct source.
           properties = Path("gradle.properties")
-          if properties.is_file():
+          if not game_versions and properties.is_file():
               text = properties.read_text(encoding="utf-8")
               match = re.search(r"^\s*minecraft_version\s*=\s*([^\s#]+)", text, re.MULTILINE)
               if match:
@@ -145,8 +160,6 @@ jobs:
                   data = json.loads(fabric_metadata.read_text(encoding="utf-8"))
                   dependency = data.get("depends", {}).get("minecraft")
                   if isinstance(dependency, str):
-                      # Platform metadata needs concrete version labels. Extract the
-                      # version token from common Fabric constraints such as "~1.21.4".
                       match = re.search(r"\d+(?:\.\d+){1,3}", dependency)
                       if match:
                           game_versions = [match.group(0)]
@@ -170,7 +183,6 @@ jobs:
                   print(f"Detected Packwiz metadata from {pack}")
 
           # Bukkit/Paper plugin compatibility is declared by api-version in plugin.yml.
-          # Use it as the game-version fallback; callers can still override loaders.
           if not game_versions:
               plugin_metadata = Path("src/main/resources/plugin.yml")
               if plugin_metadata.is_file():
@@ -202,7 +214,6 @@ jobs:
 
           dependencies = {}
 
-          # Paper's API compatibility version comes from plugin.yml.
           paper_metadata = Path("src/main/resources/plugin.yml")
           if paper_metadata.is_file():
               text = paper_metadata.read_text(encoding="utf-8")
@@ -210,7 +221,6 @@ jobs:
               if match:
                   dependencies["PAPER"] = [match.group(1)]
 
-          # Velocity server compatibility is explicitly declared in velocity-plugin.json.
           velocity_metadata = Path("src/main/resources/velocity-plugin.json")
           if velocity_metadata.is_file():
               data = json.loads(velocity_metadata.read_text(encoding="utf-8"))
@@ -325,7 +335,6 @@ jobs:
           path: platform-assets
       - name: Resolve Hangar external-link placeholders
         id: hangar-files
-        if: inputs.hangar-project-slug != '' && inputs.hangar-files != ''
         shell: bash
         env:
           HANGAR_FILES_JSON: ${{ inputs.hangar-files }}
