@@ -27,6 +27,7 @@ const { Layout } = DefaultTheme;
             Code licensed under MIT • Content under CC BY 4.0 • Icons &amp;
             Logos All Rights Reserved.
           </div>
+          <div>A <a href="https://gaming.hmlabs.eu">HMLabs-Gaming</a> Project.</div>
         </div>
       </footer>
     </template>
