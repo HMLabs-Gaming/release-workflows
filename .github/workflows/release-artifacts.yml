@@ -100,6 +100,8 @@ jobs:
       contents: write
     outputs:
       detected-loaders: ${{ steps.pack-metadata.outputs.loaders }}
+      detected-modrinth-loaders: ${{ steps.pack-metadata.outputs.modrinth-loaders }}
+      detected-curseforge-loaders: ${{ steps.pack-metadata.outputs.curseforge-loaders }}
       detected-game-versions: ${{ steps.pack-metadata.outputs.game-versions }}
       hangar-platform-dependencies: ${{ steps.hangar-metadata.outputs.platform-dependencies }}
     steps:
@@ -127,6 +129,8 @@ jobs:
           from pathlib import Path
 
           loaders = []
+          modrinth_loaders = []
+          curseforge_loaders = []
           game_versions = []
 
           # Resource-pack metadata: meta.json is intentionally outside the ZIP.
@@ -137,11 +141,14 @@ jobs:
               minecraft_from = minecraft.get("from")
               minecraft_to = minecraft.get("to")
               if minecraft_from and minecraft_to:
-                  # mc-publish accepts version ranges such as [1.13,1.21.4).
                   game_versions = [f"[{minecraft_from},{minecraft_to}]"]
               elif minecraft_from:
                   game_versions = [str(minecraft_from)]
+              # CurseForge requires the Resource Pack loader/category. Modrinth's
+              # mc-publish loader field does not accept "resourcepack"; the
+              # Modrinth project type already identifies the project as a resource pack.
               loaders = ["resourcepack"]
+              curseforge_loaders = ["resourcepack"]
               print(f"Detected resource-pack metadata from {resource_metadata}")
 
           # For Fabric/Gradle mods, gradle.properties is the most direct source.
@@ -152,6 +159,8 @@ jobs:
               if match:
                   game_versions = [match.group(1)]
                   loaders = ["fabric"]
+                  modrinth_loaders = ["fabric"]
+                  curseforge_loaders = ["fabric"]
 
           # Fall back to fabric.mod.json if the Gradle property is unavailable.
           if not game_versions:
@@ -164,6 +173,8 @@ jobs:
                       if match:
                           game_versions = [match.group(0)]
                           loaders = ["fabric"]
+                          modrinth_loaders = ["fabric"]
+                          curseforge_loaders = ["fabric"]
 
           # Packwiz metadata remains supported for modpacks.
           if not game_versions:
@@ -179,6 +190,8 @@ jobs:
                   versions = data.get("versions", {})
                   known_loaders = ("fabric", "forge", "neoforge", "quilt", "liteloader", "modloader")
                   loaders = [name for name in known_loaders if versions.get(name)]
+                  modrinth_loaders = loaders[:]
+                  curseforge_loaders = loaders[:]
                   game_versions = [str(versions["minecraft"])] if versions.get("minecraft") else []
                   print(f"Detected Packwiz metadata from {pack}")
 
@@ -191,16 +204,21 @@ jobs:
                   if match:
                       game_versions = [match.group(1)]
                       loaders = ["paper"]
+                      modrinth_loaders = ["paper"]
+                      curseforge_loaders = ["paper"]
                       print(f"Detected Paper plugin metadata from {plugin_metadata}")
 
-          print(f"Detected loaders={loaders}, game_versions={game_versions}")
+          print(f"Detected loaders={loaders}, modrinth_loaders={modrinth_loaders}, curseforge_loaders={curseforge_loaders}, game_versions={game_versions}")
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write("loaders<<DETECTED_LOADERS\n")
-              output.write("\n".join(loaders) + "\n")
-              output.write("DETECTED_LOADERS\n")
-              output.write("game-versions<<DETECTED_GAME_VERSIONS\n")
-              output.write("\n".join(game_versions) + "\n")
-              output.write("DETECTED_GAME_VERSIONS\n")
+              for key, values in (
+                  ("loaders", loaders),
+                  ("modrinth-loaders", modrinth_loaders),
+                  ("curseforge-loaders", curseforge_loaders),
+                  ("game-versions", game_versions),
+              ):
+                  output.write(f"{key}<<DETECTED_{key.upper().replace('-', '_')}\n")
+                  output.write("\n".join(values) + "\n")
+                  output.write(f"DETECTED_{key.upper().replace('-', '_')}\n")
           PY
       - name: Read Hangar platform compatibility from plugin metadata
         id: hangar-metadata
@@ -294,7 +312,7 @@ jobs:
           name: ${{ github.event.release.name || github.event.release.tag_name }}
           version: ${{ github.event.release.tag_name }}
           version-type: ${{ inputs.version-type }}
-          loaders: ${{ inputs.loaders != '' && inputs.loaders || needs.build-and-release.outputs.detected-loaders }}
+          loaders: ${{ inputs.loaders != '' && inputs.loaders || needs.build-and-release.outputs.detected-modrinth-loaders }}
           game-versions: ${{ inputs.game-versions != '' && inputs.game-versions || needs.build-and-release.outputs.detected-game-versions }}
 
   publish-curseforge:
@@ -318,7 +336,7 @@ jobs:
           name: ${{ github.event.release.name || github.event.release.tag_name }}
           version: ${{ github.event.release.tag_name }}
           version-type: ${{ inputs.version-type }}
-          loaders: ${{ inputs.loaders != '' && inputs.loaders || needs.build-and-release.outputs.detected-loaders }}
+          loaders: ${{ inputs.loaders != '' && inputs.loaders || needs.build-and-release.outputs.detected-curseforge-loaders }}
           game-versions: ${{ inputs.game-versions != '' && inputs.game-versions || needs.build-and-release.outputs.detected-game-versions }}
 
   publish-hangar:
