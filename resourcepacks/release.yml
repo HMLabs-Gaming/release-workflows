@@ -15,6 +15,6 @@ jobs:
       use-java: false
       build-command: |
         version="\${GITHUB_REF_NAME#v}"
-        zip -qr "resourcepack-\${version}.zip" pack.mcmeta assets
+        zip -qr "resourcepack-\${version}.zip" pack.mcmeta assets pack.png
       artifacts-json: '[{"path":"resourcepack-{version}.zip"}]'
     secrets: inherit
