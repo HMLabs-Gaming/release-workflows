@@ -1,0 +1,55 @@
+name: Discord Release Webhook
+
+on:
+  workflow_call:
+    inputs:
+      project-title:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      release-url:
+        type: string
+        required: true
+      changelog:
+        type: string
+        required: false
+        default: ""
+      modrinth-url:
+        type: string
+        required: false
+        default: ""
+      curseforge-url:
+        type: string
+        required: false
+        default: ""
+      hangar-url:
+        type: string
+        required: false
+        default: ""
+    secrets:
+      DISCORD_WEBHOOK:
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout workflow scripts
+        uses: actions/checkout@v4
+        with:
+          repository: HMLabs-Gaming/release-workflows
+          ref: main
+          path: release-workflows
+      - name: Send Discord release notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          PROJECT_TITLE: ${{ inputs.project-title }}
+          VERSION: ${{ inputs.version }}
+          RELEASE_URL: ${{ inputs.release-url }}
+          CHANGELOG: ${{ inputs.changelog }}
+          MODRINTH_URL: ${{ inputs.modrinth-url }}
+          CURSEFORGE_URL: ${{ inputs.curseforge-url }}
+          HANGAR_URL: ${{ inputs.hangar-url }}
+        run: python3 release-workflows/.github/scripts/discord-release.py
