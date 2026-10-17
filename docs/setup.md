@@ -11,6 +11,7 @@ Use `HMLabs-Gaming/release-workflows/.github/workflows/ci-java.yml@main` for Jav
 ## Release
 
 A project release caller should run on `release: types: [published]` and call `release-artifacts.yml`. Configure:
+
 - `project-slug`
 - `build-command`
 - `artifacts-json`: JSON array of built source paths and optional loader names
@@ -19,6 +20,8 @@ A project release caller should run on `release: types: [published]` and call `r
 Optional Modrinth and CurseForge publishing can be enabled with `modrinth-project-id` and/or `curseforge-project-id`, plus `version-type`, `loaders`, and `game-versions`. Add `secrets: inherit` to the caller job and configure `MODRINTH_TOKEN` / `CURSEFORGE_TOKEN` in the consuming repository.
 
 Hangar publishing is only for plugin projects and is controlled by `hangar-project-slug`, `hangar-channel`, `hangar-files`, and `hangar-platform-dependencies`. Add `HANGAR_API_TOKEN` as a repository Actions secret. Leave the slug or files configuration empty to skip the Hangar job. See [platform publishing](platform-publishing.md) for the file mapping format.
+
+Discord release notifications run automatically when the release workflow succeeds and all configured platform publisher jobs succeed or are skipped. Configure an Organization or repository Actions secret named `DISCORD_WEBHOOK` with the complete Discord webhook URL. The consuming caller must use `secrets: inherit`; the central release workflow forwards the webhook secret to its nested notification workflow. The notification title uses `project-slug` and the published release tag supplies the version.
 
 When pinning a caller to `@v1`, also set `workflow-ref: v1` so the naming script comes from the same tagged version.
 
