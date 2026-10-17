@@ -1,5 +1,6 @@
 import json
 import os
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -100,9 +101,14 @@ def main():
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=20) as response:
-        if not 200 <= response.status < 300:
-            raise SystemExit(f"Discord returned HTTP {response.status}")
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            if not 200 <= response.status < 300:
+                raise SystemExit(f"Discord returned HTTP {response.status}")
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace").strip()
+        detail = f": {body}" if body else ""
+        raise SystemExit(f"Discord returned HTTP {exc.code}{detail}") from exc
 
 
 if __name__ == "__main__":
