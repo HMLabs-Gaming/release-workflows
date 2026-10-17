@@ -98,7 +98,10 @@ def main():
     request = urllib.request.Request(
         webhook,
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "release-workflows-discord-webhook/1.0",
+        },
         method="POST",
     )
     try:
