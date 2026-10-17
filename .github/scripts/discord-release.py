@@ -1,5 +1,6 @@
 import json
 import os
+import urllib.parse
 import urllib.request
 
 
@@ -7,15 +8,77 @@ def env(name):
     return os.environ.get(name, "").strip()
 
 
-def main():
-    webhook = env("DISCORD_RELEASE_WEBHOOK")
-    if not webhook:
-        raise SystemExit("DISCORD_RELEASE_WEBHOOK is not configured")
+def get_json(url, headers=None):
+    request = urllib.request.Request(url, headers=headers or {}, method="GET")
+    with urllib.request.urlopen(request, timeout=20) as response:
+        return json.loads(response.read().decode("utf-8"))
 
-    fields = []
-    links = []
-    for label, key in (("GitHub Release", "RELEASE_URL"), ("Modrinth", "MODRINTH_URL"), ("CurseForge", "CURSEFORGE_URL"), ("Hangar", "HANGAR_URL")):
-        url = env(key)
+
+def modrinth_url(project_id, version):
+    if not project_id:
+        return ""
+    try:
+        versions = get_json(f"https://api.modrinth.com/v2/project/{urllib.parse.quote(project_id, safe='')}/version")
+        wanted = version.lstrip("v")
+        for item in versions:
+            if item.get("version_number") == wanted:
+                return f"https://modrinth.com/version/{item['id']}"
+    except Exception as exc:
+        print(f"Warning: Modrinth version lookup failed: {exc}")
+    return f"https://modrinth.com/project/{project_id}"
+
+
+def curseforge_url(project_id, version, token):
+    if not project_id:
+        return ""
+    try:
+        headers = {"x-api-key": token, "Accept": "application/json"} if token else {}
+        mod = get_json(f"https://api.curseforge.com/v1/mods/{project_id}", headers)["data"]
+        slug = mod.get("slug", project_id)
+        files = get_json(f"https://api.curseforge.com/v1/mods/{project_id}/files?pageSize=50", headers)["data"]
+        wanted = version.lstrip("v")
+        for item in files:
+            if item.get("displayName") in {version, wanted} or wanted in item.get("fileName", ""):
+                return f"https://www.curseforge.com/minecraft/mc-mods/{slug}/files/{item['id']}"
+        return f"https://www.curseforge.com/minecraft/mc-mods/{slug}"
+    except Exception as exc:
+        print(f"Warning: CurseForge version lookup failed: {exc}")
+        return f"https://www.curseforge.com/minecraft/mc-mods/{project_id}"
+
+
+def hangar_url(project_slug, version, token):
+    if not project_slug:
+        return ""
+    try:
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+        data = get_json(
+            f"https://hangar.papermc.io/api/v1/projects/{urllib.parse.quote(project_slug, safe='')}/versions",
+            headers,
+        )
+        versions = data.get("result", data) if isinstance(data, dict) else data
+        wanted = version.lstrip("v")
+        for item in versions:
+            if item.get("name") == wanted:
+                return f"https://hangar.papermc.io/{project_slug}/{wanted}"
+    except Exception as exc:
+        print(f"Warning: Hangar version lookup failed: {exc}")
+    return f"https://hangar.papermc.io/{project_slug}"
+
+
+def main():
+    webhook = env("DISCORD_WEBHOOK")
+    if not webhook:
+        raise SystemExit("DISCORD_WEBHOOK is not configured")
+
+    version = env("VERSION")
+    release_url = env("RELEASE_URL")
+    links = [f"[GitHub Release]({release_url})"]
+
+    for label, url in (
+        ("Modrinth", modrinth_url(env("MODRINTH_PROJECT_ID"), version)),
+        ("CurseForge", curseforge_url(env("CURSEFORGE_PROJECT_ID"), version, env("CURSEFORGE_TOKEN"))),
+        ("Hangar", hangar_url(env("HANGAR_PROJECT_SLUG"), version, env("HANGAR_API_TOKEN"))),
+    ):
         if url:
             links.append(f"[{label}]({url})")
 
@@ -24,8 +87,8 @@ def main():
         changelog = changelog[:2997] + "..."
 
     embed = {
-        "title": f"{env('PROJECT_TITLE')} {env('VERSION')} released",
-        "url": env("RELEASE_URL"),
+        "title": f"{env('PROJECT_TITLE')} {version} released",
+        "url": release_url,
         "description": changelog or "A new version has been released.",
         "fields": [{"name": "Downloads", "value": " • ".join(links), "inline": False}],
     }
@@ -38,7 +101,7 @@ def main():
         method="POST",
     )
     with urllib.request.urlopen(request, timeout=20) as response:
-        if response.status < 200 or response.status >= 300:
+        if not 200 <= response.status < 300:
             raise SystemExit(f"Discord returned HTTP {response.status}")
 
 
