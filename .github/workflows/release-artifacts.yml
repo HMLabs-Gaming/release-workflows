@@ -386,7 +386,7 @@ jobs:
       (needs.publish-hangar.result == 'success' || needs.publish-hangar.result == 'skipped')
     uses: HMLabs-Gaming/release-workflows/.github/workflows/discord-webhook.yml@main
     with:
-      project-title: ${{ github.event.release.name || inputs.project-slug }}
+      project-title: ${{ inputs.project-slug }}
       version: ${{ github.event.release.tag_name }}
       release-url: ${{ github.event.release.html_url }}
       changelog: ${{ github.event.release.body }}
