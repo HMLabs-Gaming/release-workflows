@@ -393,4 +393,5 @@ jobs:
       modrinth-project-id: ${{ inputs.modrinth-project-id }}
       curseforge-project-id: ${{ inputs.curseforge-project-id }}
       hangar-project-slug: ${{ inputs.hangar-project-slug }}
-    secrets: inherit
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
