@@ -376,14 +376,14 @@ jobs:
           platform_dependencies: ${{ needs.build-and-release.outputs.hangar-platform-dependencies != '' && needs.build-and-release.outputs.hangar-platform-dependencies || inputs.hangar-platform-dependencies }}
 
   discord-release:
-    needs: [build-and-release, publish-modrinth, publish-curseforge, publish-hangar]
+    needs:
+      [build-and-release, publish-modrinth, publish-curseforge, publish-hangar]
     if: >-
       always() &&
       needs.build-and-release.result == 'success' &&
       (needs.publish-modrinth.result == 'success' || needs.publish-modrinth.result == 'skipped') &&
       (needs.publish-curseforge.result == 'success' || needs.publish-curseforge.result == 'skipped') &&
-      (needs.publish-hangar.result == 'success' || needs.publish-hangar.result == 'skipped') &&
-      secrets.DISCORD_WEBHOOK != ''
+      (needs.publish-hangar.result == 'success' || needs.publish-hangar.result == 'skipped')
     uses: HMLabs-Gaming/release-workflows/.github/workflows/discord-webhook.yml@main
     with:
       project-title: ${{ github.event.release.name || inputs.project-slug }}
