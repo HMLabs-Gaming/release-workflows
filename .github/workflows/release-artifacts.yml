@@ -88,6 +88,8 @@ on:
         required: false
       HANGAR_API_TOKEN:
         required: false
+      DISCORD_WEBHOOK:
+        required: false
 
 permissions:
   contents: write
@@ -133,7 +135,6 @@ jobs:
           curseforge_loaders = []
           game_versions = []
 
-          # Resource-pack metadata: meta.json is intentionally outside the ZIP.
           resource_metadata = Path("meta.json")
           if resource_metadata.is_file():
               data = json.loads(resource_metadata.read_text(encoding="utf-8"))
@@ -144,14 +145,11 @@ jobs:
                   game_versions = [f"[{minecraft_from},{minecraft_to}]"]
               elif minecraft_from:
                   game_versions = [str(minecraft_from)]
-              # Modrinth's API uses "minecraft" as the loader for resource-pack
-              # versions. CurseForge uses "resourcepack" for the same project type.
               loaders = ["minecraft"]
               modrinth_loaders = ["minecraft"]
               curseforge_loaders = ["resourcepack"]
               print(f"Detected resource-pack metadata from {resource_metadata}")
 
-          # For Fabric/Gradle mods, gradle.properties is the most direct source.
           properties = Path("gradle.properties")
           if not game_versions and properties.is_file():
               text = properties.read_text(encoding="utf-8")
@@ -162,7 +160,6 @@ jobs:
                   modrinth_loaders = ["fabric"]
                   curseforge_loaders = ["fabric"]
 
-          # Fall back to fabric.mod.json if the Gradle property is unavailable.
           if not game_versions:
               fabric_metadata = Path("src/main/resources/fabric.mod.json")
               if fabric_metadata.is_file():
@@ -176,7 +173,6 @@ jobs:
                           modrinth_loaders = ["fabric"]
                           curseforge_loaders = ["fabric"]
 
-          # Packwiz metadata remains supported for modpacks.
           if not game_versions:
               candidates = [
                   Path("platforms/modrinth/pack.toml"),
@@ -195,7 +191,6 @@ jobs:
                   game_versions = [str(versions["minecraft"])] if versions.get("minecraft") else []
                   print(f"Detected Packwiz metadata from {pack}")
 
-          # Bukkit/Paper plugin compatibility is declared by api-version in plugin.yml.
           if not game_versions:
               plugin_metadata = Path("src/main/resources/plugin.yml")
               if plugin_metadata.is_file():
@@ -210,12 +205,7 @@ jobs:
 
           print(f"Detected loaders={loaders}, modrinth_loaders={modrinth_loaders}, curseforge_loaders={curseforge_loaders}, game_versions={game_versions}")
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              for key, values in (
-                  ("loaders", loaders),
-                  ("modrinth-loaders", modrinth_loaders),
-                  ("curseforge-loaders", curseforge_loaders),
-                  ("game-versions", game_versions),
-              ):
+              for key, values in (("loaders", loaders), ("modrinth-loaders", modrinth_loaders), ("curseforge-loaders", curseforge_loaders), ("game-versions", game_versions)):
                   output.write(f"{key}<<DETECTED_{key.upper().replace('-', '_')}\n")
                   output.write("\n".join(values) + "\n")
                   output.write(f"DETECTED_{key.upper().replace('-', '_')}\n")
@@ -231,7 +221,6 @@ jobs:
           from pathlib import Path
 
           dependencies = {}
-
           paper_metadata = Path("src/main/resources/plugin.yml")
           if paper_metadata.is_file():
               text = paper_metadata.read_text(encoding="utf-8")
@@ -385,3 +374,23 @@ jobs:
           description: ${{ github.event.release.body }}
           files: ${{ steps.hangar-files.outputs.json }}
           platform_dependencies: ${{ needs.build-and-release.outputs.hangar-platform-dependencies != '' && needs.build-and-release.outputs.hangar-platform-dependencies || inputs.hangar-platform-dependencies }}
+
+  discord-release:
+    needs: [build-and-release, publish-modrinth, publish-curseforge, publish-hangar]
+    if: >-
+      always() &&
+      needs.build-and-release.result == 'success' &&
+      (needs.publish-modrinth.result == 'success' || needs.publish-modrinth.result == 'skipped') &&
+      (needs.publish-curseforge.result == 'success' || needs.publish-curseforge.result == 'skipped') &&
+      (needs.publish-hangar.result == 'success' || needs.publish-hangar.result == 'skipped') &&
+      secrets.DISCORD_WEBHOOK != ''
+    uses: HMLabs-Gaming/release-workflows/.github/workflows/discord-webhook.yml@main
+    with:
+      project-title: ${{ github.event.release.name || inputs.project-slug }}
+      version: ${{ github.event.release.tag_name }}
+      release-url: ${{ github.event.release.html_url }}
+      changelog: ${{ github.event.release.body }}
+      modrinth-project-id: ${{ inputs.modrinth-project-id }}
+      curseforge-project-id: ${{ inputs.curseforge-project-id }}
+      hangar-project-slug: ${{ inputs.hangar-project-slug }}
+    secrets: inherit
