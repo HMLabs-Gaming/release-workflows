@@ -2,7 +2,7 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
   title: "HMG Release Workflows",
-  description: "Documentation of Release Workflows for HMLabs Gaming",
+  description: "Reusable GitHub Actions workflows, templates, and scripts for Minecraft releases",
   themeConfig: {
     sidebar: [
       {
@@ -13,6 +13,7 @@ export default defineConfig({
           { text: "Naming", link: "/naming" },
           { text: "Secrets", link: "/secrets" },
           { text: "Platform Publishing", link: "/platform-publishing" },
+          { text: "Contributing and Maintenance", link: "/contributing" },
           { text: "Migration", link: "/migration" },
           { text: "Troubleshooting", link: "/troubleshooting" },
         ],

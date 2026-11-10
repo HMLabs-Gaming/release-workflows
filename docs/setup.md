@@ -1,36 +1,76 @@
-# Setup guide
+# Set up a project or fork
 
-## Caller workflow files
+These instructions are for adding the workflows to a consuming Minecraft project, whether it belongs to HMLabs Gaming or is a fork of this workflow repository. Copy the relevant caller examples into the **project repository**; GitHub only exposes files under this repository's `.github/workflows/` as reusable workflows.
 
-Reusable workflows must live under `.github/workflows/` in this repository. Each project repository also keeps its own small caller files under `.github/workflows/`. The `mods/`, `plugins/`, `modpacks/`, and `resourcepacks/` folders here contain organized examples and instructions.
+## 1. Copy and customize the examples
 
-## CI
+Choose the closest template and copy its CI and release YAML files into the consuming repository's `.github/workflows/` directory:
 
-Use `HMLabs-Gaming/release-workflows/.github/workflows/ci-java.yml@main` for Java/Maven or Gradle projects, `ci-packwiz.yml@main` for Packwiz modpacks, and `ci-resourcepack.yml@main` for resource packs. After validating a release of this workflow repository, change `@main` to a stable tag such as `@v1`.
+| Project         | Templates                                                                                      | Typical build output                               |
+| --------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Java mod        | [`mods/`](https://github.com/HMLabs-Gaming/release-workflows/tree/main/mods)                   | One JAR per loader                                 |
+| Plugin          | [`plugins/`](https://github.com/HMLabs-Gaming/release-workflows/tree/main/plugins)             | One JAR or distinct platform JARs; optional Hangar |
+| Packwiz modpack | [`modpacks/`](https://github.com/HMLabs-Gaming/release-workflows/tree/main/modpacks)           | `.mrpack` and/or `.zip`                            |
+| Resource pack   | [`resourcepacks/`](https://github.com/HMLabs-Gaming/release-workflows/tree/main/resourcepacks) | ZIP package                                        |
 
-## Release
+Before committing, replace the example slug, artifact paths, build/export commands, Java or Go versions, and platform settings. A `loader` is a filename label; it does not build or convert a platform variant.
 
-A project release caller should run on `release: types: [published]` and call `release-artifacts.yml`. Configure:
+The checked-in examples reference `@main` to make initial experimentation easy. For normal production use, pin every caller to a tested workflow release tag, for example:
 
-- `project-slug`
-- `build-command`
-- `artifacts-json`: JSON array of built source paths and optional loader names
-- Java/Go setup flags as needed
+```yaml
+uses: HMLabs-Gaming/release-workflows/.github/workflows/ci-java.yml@v1
+```
 
-Optional Modrinth and CurseForge publishing can be enabled with `modrinth-project-id` and/or `curseforge-project-id`, plus `version-type`, `loaders`, and `game-versions`. Add `secrets: inherit` to the caller job and configure `MODRINTH_TOKEN` / `CURSEFORGE_TOKEN` in the consuming repository.
+In a release caller, set `workflow-ref: v1` as well, so the workflow and its helper scripts come from the same tested release. When testing a fork, replace `HMLabs-Gaming/release-workflows` with your fork's `OWNER/REPOSITORY`.
 
-Hangar publishing is only for plugin projects and is controlled by `hangar-project-slug`, `hangar-channel`, `hangar-files`, and `hangar-platform-dependencies`. Add `HANGAR_API_TOKEN` as a repository Actions secret. Leave the slug or files configuration empty to skip the Hangar job. See [platform publishing](platform-publishing.md) for the file mapping format.
+## 2. Configure CI
 
-Discord release notifications run automatically when the release workflow succeeds and all configured platform publisher jobs succeed or are skipped. Configure an Organization or repository Actions secret named `DISCORD_WEBHOOK` with the complete Discord webhook URL. The consuming caller must use `secrets: inherit`; the central release workflow forwards the webhook secret to its nested notification workflow. The notification title uses `project-slug` and the published release tag supplies the version.
+Choose the reusable workflow that matches the project:
 
-When pinning a caller to `@v1`, also set `workflow-ref: v1` so the naming script comes from the same tagged version.
+- `ci-java.yml`: installs Java, runs `build-command`, then uploads `artifact-paths`.
+- `ci-packwiz.yml`: installs Go and Packwiz, runs `validate-command`, then uploads `artifact-paths`.
+- `ci-resourcepack.yml`: runs `validate-command`, then uploads `artifact-paths`.
 
-Build commands are executable shell input. Only trusted maintainers should edit caller workflows or their build commands.
+The examples trigger on push, pull request, and manual dispatch. CI needs `contents: read`. It uploads a temporary GitHub Actions artifact; it does not create a release or publish to a platform. For Packwiz, the default installation command tracks Packwiz's `latest` version; set a controlled install command if reproducible tool versions are important to your project.
 
-## First-time repository configuration
+## 3. Configure a release
 
-- Allow GitHub Actions to access reusable workflows from this public repository.
-- Configure minimal permissions on each project.
-- Add platform tokens only when the corresponding publisher job is configured.
-- Never pass publishing secrets to fork pull requests.
-- Keep existing project workflows until the migrated workflows pass a test release.
+The release caller should trigger only when a release is published:
+
+```yaml
+on:
+  release:
+    types: [published]
+```
+
+The reusable workflow checks out that exact tag before running the trusted `build-command`. It requires these inputs:
+
+| Input            | Required | Meaning                                                                                            |
+| ---------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| `project-slug`   | Yes      | Lowercase kebab-case base name for release assets.                                                 |
+| `build-command`  | Yes      | Maintainer-controlled shell commands that build/export the files.                                  |
+| `artifacts-json` | Yes      | JSON array of source `path` values and optional `loader` labels.                                   |
+| `workflow-ref`   | No       | Ref used to check out helper scripts; defaults to `main`. Align it with the reusable workflow tag. |
+
+The `{version}` placeholder in a source path is replaced with the release tag after removing one leading `v`. The build command must create every configured file. See [naming rules](./naming) for complete examples and validation rules.
+
+Other build inputs:
+
+| Input          | Default | Use                                                              |
+| -------------- | ------- | ---------------------------------------------------------------- |
+| `java-version` | `25`    | Java version installed for a release build.                      |
+| `use-java`     | `true`  | Set `false` for a non-Java build.                                |
+| `go-version`   | `1.22`  | Go version installed when requested.                             |
+| `use-go`       | `false` | Set `true` when the release build needs Go, for example Packwiz. |
+
+The shell commands are trusted configuration: do not let untrusted pull-request input control them. Release callers need `contents: write` to attach files to a GitHub Release.
+
+## 4. Configure optional publishing
+
+Only add a publisher when that project uses the platform. Provide the relevant project identifier and token, and pass secrets using `secrets: inherit` or explicitly map the required secrets. See [platform publishing](./platform-publishing) and [secrets](./secrets) for details.
+
+Modrinth and CurseForge metadata can be provided with `loaders` and `game-versions`; when omitted, the release workflow attempts best-effort detection from project metadata. Detection is limited and may not describe every multi-platform project, so explicitly set values when detection is incomplete or ambiguous. Hangar platform compatibility is similarly detected from recognized plugin metadata, with an input available to override it.
+
+## 5. Roll out safely
+
+Start with CI on a branch and inspect the uploaded artifact. Then create a test release from the intended tag and check all GitHub Release asset names and files. Enable external publishers one at a time and confirm their uploaded version and files. Keep any old release workflow until the replacement passes these checks. For an existing project, also use the [migration checklist](./migration).

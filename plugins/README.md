@@ -1,7 +1,14 @@
-# Plugins
+# Plugin templates
 
-Use `ci.yml` and `release.yml` as caller examples. The central reusable workflows are under `.github/workflows/`.
+Copy the caller examples you need into the consuming plugin repository's `.github/workflows/` directory. Replace example project names, commands, profiles, Java versions, and artifact paths before use.
 
-Configure Java version and build command per project. Artifact JSON should list each output independently and include `loader` such as `spigot`, `paper`, `velocity`, or `universal` only when that label accurately describes the file.
+| Template | Intended use |
+| --- | --- |
+| [`ci.yml`](ci.yml) and [`release.yml`](release.yml) | Single Spigot JAR example. |
+| [`multi-jar-ci.yml`](multi-jar-ci.yml) and [`multi-jar-release.yml`](multi-jar-release.yml) | Distinct Spigot, Velocity, and universal build outputs. Remove profiles the project does not support. |
+| [`hangar-link-release.yml`](hangar-link-release.yml) | Publish a GitHub Release download link to Hangar without uploading the file to Hangar. |
+| [`hangar-link-multi-jar-release.yml`](hangar-link-multi-jar-release.yml) | Publish separate GitHub Release links for platform-specific JARs to Hangar. |
 
-Hangar is supported for plugins only. Set the actual Hangar project slug, channel, versioned file-to-platform mappings, platform version metadata, and the `HANGAR_API_TOKEN` Actions secret in the consuming plugin repository. Leave Hangar settings empty to disable the publisher. SpigotMC remains manual.
+The `loader` value changes the release filename; it does not create a compatible JAR. The default examples use `@main` for experimentation. Pin production callers to a tested release tag and align `workflow-ref` in release callers.
+
+Hangar is supported for plugins only. Its project slug and files configuration enable the job; compatibility can be detected from `src/main/resources/plugin.yml` (`api-version`) and `src/main/resources/velocity-plugin.json` (`supportedVelocityVersions`). See the [publisher guide](../docs/platform-publishing.md), [naming rules](../docs/naming.md), and [setup guide](../docs/setup.md). SpigotMC uploads remain manual.

@@ -11,6 +11,8 @@ const { Layout } = DefaultTheme;
         <div class="HMFooter__links">
           <a href="https://henrymeyer.de/legal/imprint">Imprint</a>
           <span aria-hidden="true">•</span>
+          <a href="/legal/privacy">Privacy Policy</a>
+          <span aria-hidden="true">•</span>
           <a
             href="https://github.com/HMLabs-Gaming/.github/blob/main/CODE_OF_CONDUCT.md"
             >Code of Conduct</a
@@ -27,7 +29,9 @@ const { Layout } = DefaultTheme;
             Code licensed under MIT • Content under CC BY 4.0 • Icons &amp;
             Logos All Rights Reserved.
           </div>
-          <div>A <a href="https://gaming.hmlabs.eu">HMLabs-Gaming</a> Project.</div>
+          <div>
+            A <a href="https://gaming.hmlabs.eu">HMLabs-Gaming</a> Project.
+          </div>
         </div>
       </footer>
     </template>

@@ -1,55 +1,35 @@
 # HMLabs Gaming Release Workflows
 
-Central reusable GitHub Actions workflows and caller examples for Minecraft mods, plugins, modpacks, and resource packs.
+This repository contains reusable GitHub Actions workflows, caller templates, and helper scripts for Minecraft release automation. It is used primarily for HMLabs Gaming's own GitHub and Modrinth projects, while remaining open source for contributors and people who want to fork and adapt it.
 
-## Repository layout and GitHub Actions constraint
+The repository serves three related roles:
 
-GitHub only loads reusable workflow files from `.github/workflows/`. The `mods/`, `plugins/`, `modpacks/`, and `resourcepacks/` folders therefore contain organized caller examples and documentation, not directly callable reusable workflows. Consuming projects copy these examples into their own `.github/workflows/` directory and call the central workflows.
+- **Release workflow library:** central reusable workflows live in `.github/workflows/` and are invoked from other repositories with `uses:`.
+- **Template collection:** `mods/`, `plugins/`, `modpacks/`, and `resourcepacks/` contain caller workflow examples to copy into a consuming repository. They are not reusable workflows themselves.
+- **Maintained project:** changes here can affect internal projects and external forks, so workflow behavior, examples, scripts, and docs should stay aligned.
 
-- `.github/workflows/ci-java.yml`: Java/Maven or Gradle CI
-- `.github/workflows/ci-packwiz.yml`: Packwiz modpack CI
-- `.github/workflows/ci-resourcepack.yml`: resource-pack CI
-- `.github/workflows/release-artifacts.yml`: release assets and optional platform publishing
-- `.github/workflows/validate.yml`: repository smoke tests
+Examples contain placeholders and defaults. Replace project-specific names, commands, artifact paths, metadata, and publisher settings before using them. The examples currently point at `@main` for ease of experimentation; pin production callers to a tested release tag.
 
-## Artifact naming
+## Guides
 
-Every release output is attached to the same GitHub Release in both versioned and versionless form.
+- [Set up a project or fork](./setup)
+- [Artifact naming and source paths](./naming)
+- [Secrets and permissions](./secrets)
+- [Platform publishing](./platform-publishing)
+- [Contributing and maintaining this repository](./contributing)
+- [Migrating an existing project](./migration)
+- [Troubleshooting](./troubleshooting)
 
-With a loader:
+## How releases work
 
-- `<slug>-<version>-<loader>.<ext>`
-- `<slug>-<loader>.<ext>`
+Release callers should trigger on `release: published`. The reusable workflow checks out the exact release tag, runs the configured build command, checks every configured source file, then attaches versioned and versionless assets to that GitHub Release. Optional platform jobs publish versioned files to Modrinth, CurseForge, or Hangar. Discord notification is attempted after the release and configured publishers succeed or are skipped. A publisher failure does not roll back assets already attached to GitHub Releases.
 
-Without a loader:
+CI workflows upload GitHub Actions artifacts only. They do not create a GitHub Release or publish to external platforms.
 
-- `<slug>-<version>.<ext>`
-- `<slug>.<ext>`
+## Repository links
 
-Examples:
-
-- `hmt-sync-1.0.2-spigot.jar` and `hmt-sync-spigot.jar`
-- `hm-basic-play-3.2.0.mrpack` and `hm-basic-play.mrpack`
-- `js-green-ores-1.5.0.zip` and `js-green-ores.zip`
-
-Use `universal` only when the same binary supports all configured targets. Modpack formats are distinguished by extension, not loader. The versionless assets are attached to every release too; stable latest links follow:
-`https://github.com/OWNER/REPOSITORY/releases/latest/download/ASSET_NAME`
-
-## CI and release behavior
-
-- CI builds/tests and uploads downloadable GitHub Actions artifacts; it does not publish externally.
-- Release workflows build from the published tag, generate both filename variants, and attach every variant to that GitHub Release.
-- Optional independent Modrinth and CurseForge jobs publish versioned assets when project IDs and tokens are configured.
-- Hangar publishing is available only for plugins; SpigotMC remains manual.
-- Fork pull requests must never receive publishing tokens.
-- Pin reusable workflow references to a tested release tag (for example `@v1`) once a tag is published, and set `workflow-ref` to the same tag.
-- Migrate projects incrementally and retain old workflows until each migration is verified.
-
-## Documentation
-
-- [Setup](./setup.md)
-- [Naming](./naming.md)
-- [Secrets](./secrets.md)
-- [Platform Publishing](./platform-publishing.md)
-- [Migration](./migration.md)
-- [Troubleshooting](./troubleshooting.md)
+- [Source repository](https://github.com/HMLabs-Gaming/release-workflows)
+- [Mod templates](https://github.com/HMLabs-Gaming/release-workflows/tree/main/mods)
+- [Plugin templates](https://github.com/HMLabs-Gaming/release-workflows/tree/main/plugins)
+- [Modpack templates](https://github.com/HMLabs-Gaming/release-workflows/tree/main/modpacks)
+- [Resource-pack templates](https://github.com/HMLabs-Gaming/release-workflows/tree/main/resourcepacks)
