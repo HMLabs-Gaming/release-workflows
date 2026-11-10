@@ -16,6 +16,7 @@ Examples contain placeholders and defaults. Replace project-specific names, comm
 - [Artifact naming and source paths](./naming)
 - [Secrets and permissions](./secrets)
 - [Platform publishing](./platform-publishing)
+- [Example: HM Basic Play modpack](./examples)
 - [Contributing and maintaining this repository](./contributing)
 - [Migrating an existing project](./migration)
 - [Troubleshooting](./troubleshooting)

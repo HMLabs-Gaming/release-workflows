@@ -13,6 +13,7 @@ export default defineConfig({
           { text: "Naming", link: "/naming" },
           { text: "Secrets", link: "/secrets" },
           { text: "Platform Publishing", link: "/platform-publishing" },
+          { text: "Examples", link: "/examples" },
           { text: "Contributing and Maintenance", link: "/contributing" },
           { text: "Migration", link: "/migration" },
           { text: "Troubleshooting", link: "/troubleshooting" },

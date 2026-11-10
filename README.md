@@ -10,6 +10,7 @@ This repository is the release-workflow library and template repository used pri
 - Maintaining this workflow library: read the [repository overview](https://release-workflows.gaming.hmlabs.eu/), [contributor and maintenance guide](https://release-workflows.gaming.hmlabs.eu/contributing.html), and [migration guide](https://release-workflows.gaming.hmlabs.eu/migration.html).
 - Understanding output names: see [artifact naming](https://release-workflows.gaming.hmlabs.eu/naming.html).
 - Setting up publishing credentials: see [secrets and permissions](https://release-workflows.gaming.hmlabs.eu/secrets.html) and [platform publishing](https://release-workflows.gaming.hmlabs.eu/platform-publishing.html).
+- Seeing a real Modrinth and CurseForge release flow: read the [HM Basic Play example](https://release-workflows.gaming.hmlabs.eu/examples.html).
 
 ## Repository layout
 
